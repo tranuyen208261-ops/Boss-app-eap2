@@ -1,0 +1,1672 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>B.O.S.S | Buy On Smart Schedule — Shopee & Lazada Smart BNPL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.25s ease, color 0.25s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .brand-font { font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: 0.04em; }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-slide-up { animation: slideUp 0.25s ease-out forwards; }
+        .virtual-card-bg { background: linear-gradient(135deg, #0F172A 0%, #1E293B 55%, #2563EB 100%); }
+        .shopee-gradient { background: linear-gradient(135deg, #EE4D2D 0%, #FF7337 100%); }
+        .lazada-gradient { background: linear-gradient(135deg, #0F146D 0%, #F57224 100%); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #94A3B8; border-radius: 999px; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col justify-between antialiased pb-16 xl:pb-0">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-4 right-4 left-4 sm:left-auto z-50 flex flex-col gap-2 max-w-sm sm:w-full pointer-events-none"></div>
+
+    <!-- TOP HEADER -->
+    <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-2xs">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2">
+            <!-- Brand Logo -->
+            <div onclick="handleBrandClick()" class="flex items-center gap-2.5 cursor-pointer shrink-0 select-none">
+                <div class="flex flex-col">
+                    <div class="flex items-center text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white brand-font leading-none">
+                        <span>B</span><span class="text-blue-600 mx-0.5">.</span>
+                        <span class="relative inline-flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 mx-0.5">
+                            <svg viewBox="0 0 40 44" class="w-full h-full">
+                                <rect x="3" y="2" width="34" height="40" rx="16" class="fill-slate-900 dark:fill-blue-600" />
+                                <rect x="11" y="9" width="18" height="26" rx="9" fill="#FFFFFF" />
+                                <polygon points="17,11 23,11 21.5,15 18.5,15" fill="#2563EB" />
+                                <polygon points="18.5,15.5 21.5,15.5 23.5,29 20,33.5 16.5,29" fill="#0F172A" />
+                            </svg>
+                        </span>
+                        <span class="text-blue-600 mx-0.5">.</span><span>S</span><span class="text-blue-600 mx-0.5">.</span><span>S</span>
+                    </div>
+                    <span class="text-[8px] sm:text-[9px] font-bold tracking-[0.2em] text-slate-500 dark:text-slate-400 mt-0.5 uppercase">Buy On Smart Schedule</span>
+                </div>
+            </div>
+
+            <!-- Desktop Navigation -->
+            <nav id="desktop-nav" class="hidden xl:flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl">
+                <button onclick="switchTab('dashboard')" data-tab="dashboard" class="app-nav-btn px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-2xs">
+                    <i class="fa-solid fa-chart-pie text-blue-600"></i><span>Dashboard</span>
+                </button>
+                <button onclick="switchTab('discovery')" data-tab="discovery" class="app-nav-btn px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
+                    <i class="fa-solid fa-bag-shopping text-orange-500"></i><span>Shopee & Lazada</span>
+                </button>
+                <button onclick="switchTab('planner')" data-tab="planner" class="app-nav-btn px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
+                    <i class="fa-solid fa-link text-amber-500"></i><span>Link & Planner</span>
+                </button>
+                <button onclick="switchTab('calendar')" data-tab="calendar" class="app-nav-btn px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
+                    <i class="fa-solid fa-calendar-check text-emerald-500"></i><span>Smart Calendar</span>
+                </button>
+                <button onclick="switchTab('payments')" data-tab="payments" class="app-nav-btn px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
+                    <i class="fa-solid fa-credit-card text-rose-500"></i><span>Payments</span>
+                </button>
+                <button onclick="switchTab('support')" data-tab="support" class="app-nav-btn px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
+                    <i class="fa-solid fa-headset text-cyan-500"></i><span>Support & B2B</span>
+                </button>
+            </nav>
+
+            <!-- Right Controls -->
+            <div class="flex items-center gap-1.5 sm:gap-2">
+                <!-- Multi-Currency Toggle ($ USD / ₫ VND) -->
+                <div class="flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 sm:p-1 rounded-xl border border-slate-200 dark:border-slate-700" title="Switch Currency (USD / VND)">
+                    <button onclick="setCurrency('USD')" id="curr-btn-USD" class="px-2 py-1 rounded-lg text-[11px] font-extrabold transition bg-white dark:bg-slate-900 text-blue-600 shadow-2xs">$ USD</button>
+                    <button onclick="setCurrency('VND')" id="curr-btn-VND" class="px-2 py-1 rounded-lg text-[11px] font-extrabold transition text-slate-500 dark:text-slate-400">₫ VND</button>
+                </div>
+
+                <!-- Dark/Light Theme Toggle -->
+                <button onclick="toggleTheme()" title="Toggle Dark / Light Mode" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-amber-400 flex items-center justify-center transition shrink-0">
+                    <i id="theme-icon" class="fa-solid fa-moon text-xs sm:text-sm"></i>
+                </button>
+
+                <!-- Guest Buttons -->
+                <div id="header-guest-box" class="flex items-center gap-1.5">
+                    <button onclick="openAuthModal()" class="hidden sm:inline-flex px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-blue-600 transition">Sign In</button>
+                    <button onclick="quickDemoLogin()" class="px-3 sm:px-4 py-2 bg-slate-900 dark:bg-blue-600 hover:bg-blue-600 text-white text-xs font-extrabold rounded-xl shadow-xs transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-bolt text-amber-400"></i><span>Demo Login</span>
+                    </button>
+                </div>
+
+                <!-- Logged-In User Badge -->
+                <div id="header-user-box" class="hidden items-center gap-1.5">
+                    <div onclick="switchTab('account')" class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 pl-1.5 pr-2.5 py-1 rounded-xl cursor-pointer border border-slate-200 dark:border-slate-700">
+                        <img id="header-avatar-img" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80" alt="Avatar" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg object-cover bg-blue-600">
+                        <div class="hidden md:block text-left">
+                            <p id="header-user-name" class="text-xs font-extrabold leading-tight">Alex Nguyen</p>
+                            <p id="header-credit-label" class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">$1,690.00 Avail.</p>
+                        </div>
+                        <i class="fa-solid fa-gear text-[11px] text-slate-400"></i>
+                    </div>
+                    <button onclick="logoutUser()" title="Sign Out" class="w-8 h-8 rounded-xl bg-rose-50 dark:bg-rose-950/50 text-rose-600 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-right-from-bracket text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN VIEWPORT -->
+    <main class="flex-grow">
+        <!-- 1. LANDING VIEW -->
+        <section id="view-landing" class="animate-slide-up">
+            <div class="bg-gradient-to-br from-slate-900 via-slate-900 to-blue-950 text-white py-10 sm:py-16 lg:py-20 relative overflow-hidden">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+                    <div class="lg:col-span-7 space-y-5">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-[11px] font-bold uppercase tracking-wider">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>B.O.S.S Interactive Demo
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EE4D2D]/20 border border-[#EE4D2D]/40 text-orange-200 text-[11px] font-bold">
+                                <i class="fa-solid fa-bag-shopping text-[#EE4D2D]"></i>Shopee Mall Partner
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/40 text-indigo-200 text-[11px] font-bold">
+                                <i class="fa-solid fa-store text-pink-400"></i>LazMall Partner
+                            </span>
+                        </div>
+
+                        <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
+                            Shop Directly on <span class="text-[#FF7337]">Shopee</span> & <span class="text-blue-400">Lazada</span>, <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300">Pay Smart with B.O.S.S.</span>
+                        </h1>
+                        <p class="text-sm sm:text-base text-slate-300 max-w-2xl leading-relaxed">
+                            Select any item from <strong>Shopee Mall</strong> or <strong>LazMall</strong>—or paste a product link directly—to split payments into <strong>0% APR installments</strong> with automated Smart Calendar tracking and Budget Guardrails.
+                        </p>
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
+                            <button onclick="quickDemoLogin()" class="px-6 py-4 bg-emerald-500 hover:bg-emerald-400 active:scale-[0.99] text-slate-950 font-extrabold rounded-2xl shadow-lg transition flex items-center justify-center gap-2.5 text-sm sm:text-base">
+                                <i class="fa-solid fa-bolt text-slate-900"></i><span>1-Tap Demo Experience (QR Ready)</span>
+                            </button>
+                            <button onclick="openAuthModal()" class="px-5 py-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold rounded-2xl transition flex items-center justify-center gap-2 text-sm">
+                                <span>Sign In & Take 3-Step Survey</span><i class="fa-solid fa-arrow-right"></i>
+                            </button>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-4 pt-2 text-xs text-slate-400">
+                            <span><i class="fa-solid fa-check text-emerald-400 mr-1"></i>Shopee & Lazada Link Importer</span>
+                            <span><i class="fa-solid fa-check text-emerald-400 mr-1"></i>0% APR 3–4 Splits</span>
+                            <span><i class="fa-solid fa-check text-emerald-400 mr-1"></i>$ USD & ₫ VND Ready</span>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Split Calculator Card -->
+                    <div class="lg:col-span-5">
+                        <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-3xl p-5 sm:p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+                            <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                                <div>
+                                    <span class="text-[11px] font-bold uppercase text-[#EE4D2D]">Shopee Mall Pitch Scenario</span>
+                                    <h3 class="text-base sm:text-lg font-extrabold">15M VND ($600) Camera Split</h3>
+                                </div>
+                                <span class="px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 text-[11px] font-bold rounded-lg">Zero Hidden Fees</span>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs sm:text-sm font-bold mb-2">
+                                    <span class="text-slate-500">Order Amount:</span>
+                                    <span id="hero-calc-val" class="text-blue-600 font-extrabold">$600.00</span>
+                                </div>
+                                <input type="range" id="hero-calc-slider" min="120" max="3000" step="60" value="600" oninput="updateHeroCalc()" class="w-full h-2.5 bg-slate-200 dark:bg-slate-700 rounded-lg accent-blue-600 cursor-pointer">
+                            </div>
+                            <div class="grid grid-cols-3 gap-2">
+                                <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-blue-200 dark:border-blue-900 text-center">
+                                    <p class="text-[10px] font-extrabold text-blue-600">3 MONTHS</p>
+                                    <p id="hero-calc-3" class="text-xs sm:text-sm font-extrabold mt-1">$200.00</p>
+                                    <p class="text-[10px] text-slate-500">/ mo • 0% APR</p>
+                                </div>
+                                <div class="p-3 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900 text-center">
+                                    <p class="text-[10px] font-extrabold text-emerald-600">4 MONTHS</p>
+                                    <p id="hero-calc-4" class="text-xs sm:text-sm font-extrabold mt-1">$150.00</p>
+                                    <p class="text-[10px] text-slate-500">/ mo • 0% APR</p>
+                                </div>
+                                <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-center">
+                                    <p class="text-[10px] font-extrabold text-slate-500">6 MONTHS</p>
+                                    <p id="hero-calc-6" class="text-xs sm:text-sm font-extrabold mt-1">$102.50</p>
+                                    <p class="text-[10px] text-slate-500">/ mo • 2.5% Fee</p>
+                                </div>
+                            </div>
+                            <button onclick="quickDemoLogin()" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold rounded-2xl text-xs sm:text-sm transition shadow-md">Browse Shopee & Lazada Deals →</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature Cards -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2">
+                        <div class="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-950 text-[#EE4D2D] flex items-center justify-center"><i class="fa-solid fa-bag-shopping"></i></div>
+                        <h3 class="font-extrabold text-sm">Shopee & Lazada Sync</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Pick products directly from partner stores or paste any product link to split payments.</p>
+                    </div>
+                    <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2">
+                        <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950 text-amber-600 flex items-center justify-center"><i class="fa-solid fa-id-card-clip"></i></div>
+                        <h3 class="font-extrabold text-sm">60-Second e-KYC</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Instant digital verification doubles your credit limit from $2,500 to $5,000.</p>
+                    </div>
+                    <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 flex items-center justify-center"><i class="fa-solid fa-calendar-days"></i></div>
+                        <h3 class="font-extrabold text-sm">Smart Money Calendar</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Auto-logs every due date and lets you add personal payday & budget reminders.</p>
+                    </div>
+                    <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2">
+                        <div class="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-950 text-rose-600 flex items-center justify-center"><i class="fa-solid fa-shield-halved"></i></div>
+                        <h3 class="font-extrabold text-sm">Safe Budget Guardrail</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Self-regulated monthly repayment cap prevents overspending and late fee traps.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. 3-STEP ONBOARDING SURVEY -->
+        <section id="view-survey" class="hidden py-8 px-4 sm:px-6 max-w-3xl mx-auto animate-slide-up">
+            <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+                <div class="bg-slate-900 text-white p-6 sm:p-8">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold uppercase tracking-widest text-emerald-400">Personalized Calibration</span>
+                        <span id="survey-badge" class="px-3 py-1 bg-white/10 rounded-full text-xs font-bold">Step 1 of 3</span>
+                    </div>
+                    <h2 id="survey-heading" class="text-xl sm:text-2xl font-extrabold">Step 1: Shopping Preferences & Categories</h2>
+                    <p id="survey-sub" class="text-xs sm:text-sm text-slate-300 mt-1">Select categories you care about so B.O.S.S tags matching deals as "Recommended For You".</p>
+                    <div class="w-full bg-slate-700 h-2 rounded-full mt-5 overflow-hidden">
+                        <div id="survey-bar" class="bg-emerald-400 h-full transition-all duration-300" style="width: 33.33%"></div>
+                    </div>
+                </div>
+                <div class="p-6 sm:p-8">
+                    <div id="survey-step-1" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5"></div>
+                    <div id="survey-step-2" class="hidden space-y-6">
+                        <div>
+                            <label class="block text-sm font-extrabold mb-2">1. Have you ever used a Buy Now, Pay Later (BNPL) service before?</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <button type="button" onclick="setSurveyField('usedBefore', 'Yes, experienced BNPL user')" data-sgroup="usedBefore" data-sval="Yes, experienced BNPL user" class="s-radio-btn p-3.5 rounded-xl border-2 text-left text-xs font-bold">Yes, I have used BNPL before</button>
+                                <button type="button" onclick="setSurveyField('usedBefore', 'No, first-time BNPL user')" data-sgroup="usedBefore" data-sval="No, first-time BNPL user" class="s-radio-btn p-3.5 rounded-xl border-2 text-left text-xs font-bold">No, this is my first time</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-extrabold mb-2">2. How do you view flexible split-payment services?</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                                <button type="button" onclick="setSurveyField('enjoyment', 'Love it (5/5)')" data-sgroup="enjoyment" data-sval="Love it (5/5)" class="s-radio-btn p-3 rounded-xl border-2 text-left text-xs font-bold">Love it! Great liquidity</button>
+                                <button type="button" onclick="setSurveyField('enjoyment', 'Prefer 0% APR Only (4/5)')" data-sgroup="enjoyment" data-sval="Prefer 0% APR Only (4/5)" class="s-radio-btn p-3 rounded-xl border-2 text-left text-xs font-bold">Yes, when 0% APR</button>
+                                <button type="button" onclick="setSurveyField('enjoyment', 'Cautious Planner (3/5)')" data-sgroup="enjoyment" data-sval="Cautious Planner (3/5)" class="s-radio-btn p-3 rounded-xl border-2 text-left text-xs font-bold">Cautious — need reminders</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-extrabold mb-2">3. Primary purposes for using BNPL:</label>
+                            <div id="survey-purposes-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5"></div>
+                        </div>
+                    </div>
+                    <div id="survey-step-3" class="hidden space-y-6">
+                        <div>
+                            <label class="block text-sm font-extrabold mb-2">1. How frequently do you plan to use B.O.S.S?</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <button type="button" onclick="setSurveyField('frequency', 'Weekly')" data-sgroup="frequency" data-sval="Weekly" class="s-radio-btn p-3.5 rounded-xl border-2 text-left text-xs font-bold">Weekly</button>
+                                <button type="button" onclick="setSurveyField('frequency', '1–2 times / month')" data-sgroup="frequency" data-sval="1–2 times / month" class="s-radio-btn p-3.5 rounded-xl border-2 text-left text-xs font-bold">1–2 times / month</button>
+                                <button type="button" onclick="setSurveyField('frequency', 'Quarterly')" data-sgroup="frequency" data-sval="Quarterly" class="s-radio-btn p-3.5 rounded-xl border-2 text-left text-xs font-bold">Quarterly</button>
+                                <button type="button" onclick="setSurveyField('frequency', 'Only for big-ticket items')" data-sgroup="frequency" data-sval="Only for big-ticket items" class="s-radio-btn p-3.5 rounded-xl border-2 text-left text-xs font-bold">Only for big-ticket items</button>
+                            </div>
+                        </div>
+                        <div class="bg-emerald-50/70 dark:bg-emerald-950/30 p-5 rounded-2xl border border-emerald-200 dark:border-emerald-800">
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-sm font-extrabold">2. Monthly Safe Repayment Cap</label>
+                                <span id="survey-cap-display" class="px-3 py-1 bg-white dark:bg-slate-800 rounded-xl border border-emerald-300 font-extrabold text-emerald-700 dark:text-emerald-400 text-sm">$600.00</span>
+                            </div>
+                            <input type="range" id="survey-cap-slider" min="200" max="2000" step="50" value="600" oninput="syncSurveyCap(this.value)" class="w-full h-2.5 bg-slate-200 dark:bg-slate-700 rounded-lg accent-emerald-600">
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between pt-6 mt-6 border-t border-slate-200 dark:border-slate-800">
+                        <button type="button" id="survey-back-btn" onclick="stepSurvey(-1)" class="hidden px-5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold">← Previous</button>
+                        <button type="button" id="survey-next-btn" onclick="stepSurvey(1)" class="ml-auto px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-extrabold">Next Step →</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. INTERACTIVE WORKSPACE -->
+        <section id="view-workspace" class="hidden py-6 sm:py-8 px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto animate-slide-up">
+            <!-- TAB A: DASHBOARD -->
+            <div id="tab-dashboard" class="space-y-6">
+                <div class="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="flex items-center gap-3.5">
+                        <img id="dash-avatar" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80" alt="Avatar" class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl object-cover border-2 border-blue-600 shrink-0">
+                        <div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <h1 class="text-lg sm:text-xl font-extrabold">Hi, <span id="dash-name" class="text-blue-600">Alex Nguyen</span></h1>
+                                <span id="dash-kyc-pill" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800">Standard Tier</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-1">"Buy Now, Pay Later ≠ Buy Now, Forget Later." • <button onclick="reopenSurvey()" class="text-blue-600 font-bold underline">Personalize Survey</button></p>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="openEkycModal()" id="dash-kyc-btn" class="px-3.5 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs rounded-xl transition">Instant e-KYC (2x Limit)</button>
+                        <button onclick="switchTab('discovery')" class="px-3.5 py-2.5 bg-[#EE4D2D] hover:opacity-90 text-white font-bold text-xs rounded-xl transition flex items-center gap-1.5"><i class="fa-solid fa-bag-shopping"></i>Shopee & Lazada</button>
+                        <button onclick="resetDemoState()" class="px-3 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-xs rounded-xl transition"><i class="fa-solid fa-rotate-right mr-1"></i>Reset</button>
+                    </div>
+                </div>
+
+                <!-- 4 KPI Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+                    <div class="bg-slate-900 text-white p-5 sm:p-6 rounded-2xl">
+                        <p class="text-[11px] font-bold uppercase text-slate-400">Available Credit Limit</p>
+                        <h3 id="kpi-avail-credit" class="text-2xl sm:text-3xl font-extrabold mt-1 text-emerald-400">$1,690.00</h3>
+                        <p class="mt-3 pt-3 border-t border-slate-700 text-xs text-slate-300 flex justify-between">
+                            <span>Limit: <strong id="kpi-total-limit">$2,500</strong></span>
+                            <button onclick="openEkycModal()" id="kpi-boost-link" class="text-amber-400 font-bold underline">Upgrade →</button>
+                        </p>
+                    </div>
+                    <div class="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <p class="text-[11px] font-bold uppercase text-slate-500">Total Payable Balance</p>
+                        <h3 id="kpi-payable-balance" class="text-2xl sm:text-3xl font-extrabold mt-1">$810.00</h3>
+                        <p id="kpi-active-count" class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-500">2 active installment plans</p>
+                    </div>
+                    <div class="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <p class="text-[11px] font-bold uppercase text-slate-500">Monthly Installment Load</p>
+                        <h3 id="kpi-monthly-load" class="text-2xl sm:text-3xl font-extrabold mt-1">$330.00</h3>
+                        <p id="kpi-safe-cap-text" class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs text-emerald-600 font-bold">Safe Cap: $600.00 / mo</p>
+                    </div>
+                    <div class="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <p class="text-[11px] font-bold uppercase text-slate-500">Financial Health Score</p>
+                        <h3 class="text-2xl sm:text-3xl font-extrabold mt-1 text-emerald-600">94 <span class="text-sm text-slate-400">/ 100</span></h3>
+                        <p class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-500">Smart Schedule Discipline</p>
+                    </div>
+                </div>
+
+                <!-- Safe Budget Guardrail & Smart Insights -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
+                    <div class="lg:col-span-7 bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+                        <div class="flex items-center justify-between gap-2">
+                            <h3 class="text-sm sm:text-base font-extrabold"><i class="fa-solid fa-shield-halved text-emerald-600 mr-2"></i>Monthly Safe Budget Guardrail</h3>
+                            <span id="guardrail-pill" class="px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800 shrink-0">Healthy (55%)</span>
+                        </div>
+                        <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800 space-y-2">
+                            <div class="flex justify-between text-xs font-bold">
+                                <span>Monthly Load: <strong id="guardrail-used-lbl">$330.00</strong></span>
+                                <span>Safe Limit: <strong id="guardrail-max-lbl">$600.00</strong></span>
+                            </div>
+                            <div class="w-full bg-slate-200 dark:bg-slate-700 h-3 rounded-full overflow-hidden">
+                                <div id="guardrail-fill" class="bg-emerald-500 h-full transition-all" style="width: 55%"></div>
+                            </div>
+                            <p id="guardrail-msg" class="text-xs text-slate-600 dark:text-slate-300"></p>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs font-bold mb-1">
+                                <span>Adjust Monthly Safe Repayment Cap</span>
+                                <span id="dash-budget-slider-val" class="text-blue-600">$600 / mo</span>
+                            </div>
+                            <input type="range" id="dash-budget-slider" min="200" max="2000" step="50" value="600" oninput="updateMonthlySafeCap(this.value)" class="w-full h-2.5 bg-slate-200 dark:bg-slate-700 rounded-lg accent-blue-600">
+                        </div>
+                    </div>
+                    <div class="lg:col-span-5 bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
+                        <h3 class="text-sm sm:text-base font-extrabold"><i class="fa-solid fa-wand-magic-sparkles text-blue-600 mr-2"></i>Smart Spending Insights</h3>
+                        <div id="smart-insights-list" class="space-y-2.5 text-xs"></div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
+                    <div class="lg:col-span-7 bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <h3 class="text-sm sm:text-base font-extrabold mb-3">Monthly Spending & Repayment Cash Flow</h3>
+                        <div class="h-60 sm:h-64 w-full"><canvas id="monthlyCashflowChart"></canvas></div>
+                    </div>
+                    <div class="lg:col-span-5 bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <h3 class="text-sm sm:text-base font-extrabold mb-3">Spending by Category</h3>
+                        <div class="h-60 sm:h-64 w-full"><canvas id="categoryDoughnutChart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB B: SHOPEE & LAZADA DIRECT PRODUCT CATALOG -->
+            <div id="tab-discovery" class="hidden space-y-5">
+                <div class="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="px-2.5 py-0.5 rounded-md text-[10px] font-extrabold text-white shopee-gradient">SHOPEE MALL</span>
+                                <span class="px-2.5 py-0.5 rounded-md text-[10px] font-extrabold text-white lazada-gradient">LAZMALL</span>
+                                <span class="text-xs font-bold text-emerald-600">• Direct Checkout Integration</span>
+                            </div>
+                            <h2 class="text-xl sm:text-2xl font-extrabold">Shopee & Lazada Partner Storefront</h2>
+                            <p class="text-xs text-slate-500">Select items directly from Shopee Mall or LazMall and split into 0% APR installments via B.O.S.S.</p>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="switchTab('planner')" class="px-3.5 py-2 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs font-extrabold flex items-center gap-1.5">
+                                <i class="fa-solid fa-link"></i><span>Paste Shopee/Lazada Link</span>
+                            </button>
+                            <input type="text" id="prod-search" onkeyup="renderProducts()" placeholder="Search Shopee / Lazada..." class="px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs flex-1 sm:flex-initial">
+                        </div>
+                    </div>
+
+                    <!-- Platform & Category Filter Bar -->
+                    <div class="flex gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 overflow-x-auto no-scrollbar pb-1" id="prod-cat-bar">
+                        <button onclick="setProdFilter('All', this)" class="p-cat-btn px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-900 dark:bg-blue-600 text-white shrink-0">All Stores</button>
+                        <button onclick="setProdFilter('Shopee', this)" class="p-cat-btn px-3.5 py-2 rounded-xl text-xs font-bold bg-orange-50 dark:bg-orange-950/50 text-[#EE4D2D] border border-orange-200 dark:border-orange-900 shrink-0"><i class="fa-solid fa-bag-shopping mr-1"></i>Shopee Mall</button>
+                        <button onclick="setProdFilter('Lazada', this)" class="p-cat-btn px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-900 shrink-0"><i class="fa-solid fa-store mr-1"></i>LazMall</button>
+                        <button onclick="setProdFilter('Recommended', this)" class="p-cat-btn px-3.5 py-2 rounded-xl text-xs font-bold bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 shrink-0">Recommended For You</button>
+                        <button onclick="setProdFilter('Technology', this)" class="p-cat-btn px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 shrink-0">Technology</button>
+                        <button onclick="setProdFilter('Fashion', this)" class="p-cat-btn px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 shrink-0">Fashion</button>
+                        <button onclick="setProdFilter('Home Appliances', this)" class="p-cat-btn px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 shrink-0">Home Appliances</button>
+                    </div>
+                </div>
+                <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+            </div>
+
+            <!-- TAB C: SMART LINK IMPORTER & PAYMENT PLANNER -->
+            <div id="tab-planner" class="hidden space-y-6">
+                <!-- Smart Shopee & Lazada Link Importer Banner -->
+                <div class="bg-gradient-to-r from-slate-900 via-slate-900 to-indigo-950 text-white p-5 sm:p-6 rounded-2xl border border-slate-800 shadow-lg space-y-4">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                        <div>
+                            <span class="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-extrabold uppercase tracking-wider">Direct E-Commerce Bridge</span>
+                            <h2 class="text-lg sm:text-xl font-extrabold mt-1">Paste Any Shopee or Lazada Product Link</h2>
+                            <p class="text-xs text-slate-300">Found something on Shopee or Lazada? Paste the URL below to auto-import price & split into 0% APR installments.</p>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5">
+                            <button type="button" onclick="fillSampleLink('shopee')" class="px-3 py-1.5 rounded-xl bg-[#EE4D2D] hover:opacity-90 text-white text-[11px] font-extrabold transition">Try Sample Shopee Link</button>
+                            <button type="button" onclick="fillSampleLink('lazada')" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-extrabold transition">Try Sample Lazada Link</button>
+                        </div>
+                    </div>
+                    <form onsubmit="importEcommerceLink(event)" class="flex flex-col sm:flex-row gap-2.5">
+                        <div class="relative flex-1">
+                            <i class="fa-solid fa-link absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                            <input type="text" id="ecom-url-input" placeholder="https://shopee.vn/Sony-Alpha-Camera-15M-i.12345 or https://lazada.vn/..." class="w-full pl-9 pr-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-slate-400 text-xs sm:text-sm focus:outline-none focus:border-emerald-400">
+                        </div>
+                        <button type="submit" class="px-5 py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs sm:text-sm rounded-xl transition shrink-0">
+                            <i class="fa-solid fa-wand-magic-sparkles mr-1.5"></i>Fetch & Calculate Split
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Planner Form & Due Date Schedule -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <div class="lg:col-span-7 bg-white dark:bg-slate-900 p-5 sm:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-5">
+                        <div class="flex items-center justify-between gap-2">
+                            <h3 class="text-lg sm:text-xl font-extrabold">B.O.S.S Installment Checkout</h3>
+                            <span id="planner-platform-badge" class="px-3 py-1 rounded-lg text-xs font-extrabold text-white shopee-gradient">Shopee Mall Partner</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold mb-1">Product Title</label>
+                                <input type="text" id="planner-item-title" value="Sony Alpha Mirrorless Camera (15M VND)" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-semibold">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold mb-1">Store Platform & Category</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <select id="planner-platform-select" onchange="updatePlannerPlatformBadge(this.value)" class="px-2.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-extrabold">
+                                        <option value="Shopee">Shopee Mall</option>
+                                        <option value="Lazada">LazMall</option>
+                                        <option value="Direct">B.O.S.S Direct</option>
+                                    </select>
+                                    <select id="planner-item-cat" class="px-2.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-semibold">
+                                        <option value="Technology">Technology</option>
+                                        <option value="Fashion">Fashion</option>
+                                        <option value="Home Appliances">Appliances</option>
+                                        <option value="Transportation">Mobility</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-extrabold uppercase">Total Order Value (Base USD)</span>
+                                <div class="flex items-center gap-2">
+                                    <span id="planner-formatted-val" class="text-sm font-extrabold text-blue-600">$600.00</span>
+                                    <input type="number" id="planner-amount-input" min="50" max="5000" value="600" oninput="syncPlanner('input')" class="w-20 px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 font-bold text-xs">
+                                </div>
+                            </div>
+                            <input type="range" id="planner-amount-slider" min="50" max="5000" step="20" value="600" oninput="syncPlanner('slider')" class="w-full h-2.5 bg-slate-200 dark:bg-slate-700 rounded-lg accent-blue-600">
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                            <button type="button" onclick="setPlannerMonths(3)" id="pl-m-3" class="pl-m-btn p-3 rounded-xl border-2 border-blue-600 text-center"><p class="text-xs sm:text-sm font-extrabold">3 Months</p><p class="text-[11px] text-emerald-600 font-bold">0% APR</p></button>
+                            <button type="button" onclick="setPlannerMonths(4)" id="pl-m-4" class="pl-m-btn p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-center"><p class="text-xs sm:text-sm font-extrabold">4 Months</p><p class="text-[11px] text-emerald-600 font-bold">0% APR</p></button>
+                            <button type="button" onclick="setPlannerMonths(6)" id="pl-m-6" class="pl-m-btn p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-center"><p class="text-xs sm:text-sm font-extrabold">6 Months</p><p class="text-[11px] text-slate-500">2.5% Fee</p></button>
+                            <button type="button" onclick="setPlannerMonths(12)" id="pl-m-12" class="pl-m-btn p-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-center"><p class="text-xs sm:text-sm font-extrabold">12 Months</p><p class="text-[11px] text-slate-500">4.5% Fee</p></button>
+                        </div>
+                        <div class="bg-slate-900 text-white p-5 rounded-2xl space-y-2.5 text-xs">
+                            <div class="flex justify-between"><span>Principal Value</span><strong id="pl-out-principal">$600.00</strong></div>
+                            <div class="flex justify-between"><span>Service Fee & Interest</span><strong id="pl-out-fee" class="text-emerald-400">$0.00 (0% APR)</strong></div>
+                            <div class="flex justify-between pb-2 border-b border-slate-700"><span>Total Cost Payable</span><strong id="pl-out-total">$600.00</strong></div>
+                            <div class="flex justify-between items-center pt-1">
+                                <div><p class="font-bold">Per Installment</p><p id="pl-guardrail-note" class="text-emerald-400 text-[11px]"></p></div>
+                                <p id="pl-out-monthly" class="text-xl sm:text-2xl font-extrabold text-emerald-400">$200.00</p>
+                            </div>
+                        </div>
+                        <button onclick="executePlannedPurchase()" class="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-extrabold text-xs sm:text-sm rounded-2xl transition shadow-md">Confirm Partner Checkout & Auto-Log to Calendar</button>
+                    </div>
+                    <div class="lg:col-span-5 bg-white dark:bg-slate-900 p-5 sm:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+                        <h3 class="text-base sm:text-lg font-extrabold">Exact Scheduled Due Dates</h3>
+                        <div id="planner-dates-list" class="space-y-2 max-h-96 overflow-y-auto"></div>
+                        <p class="text-xs text-slate-500 pt-2 border-t border-slate-100 dark:border-slate-800">Available Credit Limit: <strong id="planner-avail-credit">$1,690.00</strong></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB D: SMART CALENDAR -->
+            <div id="tab-calendar" class="hidden space-y-5">
+                <div class="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-lg sm:text-xl font-extrabold">Smart Schedule & Money Calendar</h2>
+                        <p class="text-xs text-slate-500 mt-1">Auto-logs Shopee/Lazada purchases & due dates. Tap any date to add personal money notes.</p>
+                    </div>
+                    <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 p-1.5 rounded-xl self-start">
+                        <button onclick="changeCalendarMonth(-1)" class="w-9 h-9 rounded-lg bg-white dark:bg-slate-900 flex items-center justify-center"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+                        <span id="cal-month-title" class="px-3 text-xs sm:text-sm font-extrabold min-w-[130px] text-center">November 2026</span>
+                        <button onclick="changeCalendarMonth(1)" class="w-9 h-9 rounded-lg bg-white dark:bg-slate-900 flex items-center justify-center"><i class="fa-solid fa-chevron-right text-xs"></i></button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                    <div class="lg:col-span-8 bg-white dark:bg-slate-900 p-3.5 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <div class="grid grid-cols-7 gap-1 text-center text-[10px] sm:text-xs font-extrabold text-slate-400 uppercase pb-2 border-b border-slate-100 dark:border-slate-800">
+                            <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                        </div>
+                        <div id="calendar-days-grid" class="grid grid-cols-7 gap-1 sm:gap-1.5 pt-2.5"></div>
+                    </div>
+                    <div class="lg:col-span-4 bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+                        <div class="pb-3 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                            <div>
+                                <span class="text-[10px] font-bold uppercase text-blue-600">Selected Date Log</span>
+                                <h3 id="cal-selected-date-label" class="text-base sm:text-lg font-extrabold">2026-11-13</h3>
+                            </div>
+                            <span id="cal-entry-count-badge" class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-xs font-bold rounded-lg">0 logs</span>
+                        </div>
+                        <form onsubmit="addCalendarUserNote(event)" class="bg-slate-50 dark:bg-slate-800 p-3.5 rounded-xl space-y-2.5">
+                            <label class="block text-xs font-extrabold text-emerald-600">+ Add Personal Money Note</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <select id="cal-note-type" class="px-2.5 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-xs font-bold">
+                                    <option value="Spending Note">Spending Note</option>
+                                    <option value="Income / Payday">Income / Payday</option>
+                                    <option value="Budget Reminder">Budget Reminder</option>
+                                    <option value="Savings Goal">Savings Goal</option>
+                                </select>
+                                <input type="number" id="cal-note-amount" step="0.01" placeholder="Amount $ (opt)" class="px-2.5 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-xs">
+                            </div>
+                            <input type="text" id="cal-note-text" required placeholder="e.g., Payday +$1,500 or Save for laptop..." class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-xs">
+                            <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg">Save Note to Date</button>
+                        </form>
+                        <div id="cal-day-entries-list" class="space-y-2.5 max-h-80 overflow-y-auto"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB E: PAYMENT MANAGEMENT & VIRTUAL CARD -->
+            <div id="tab-payments" class="hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <div class="lg:col-span-8 bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+                        <div class="flex flex-wrap justify-between items-center gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
+                            <h2 class="text-lg sm:text-xl font-extrabold">Installment Plans & Repayment</h2>
+                            <div class="flex gap-1.5 text-xs font-bold">
+                                <button onclick="filterPaymentPlans('ALL')" class="px-3 py-1.5 rounded-lg bg-slate-900 dark:bg-blue-600 text-white">All</button>
+                                <button onclick="filterPaymentPlans('OVERDUE')" class="px-3 py-1.5 rounded-lg bg-rose-50 dark:bg-rose-950 text-rose-600">Overdue</button>
+                            </div>
+                        </div>
+                        <div id="payment-plans-container" class="space-y-4"></div>
+                    </div>
+
+                    <div class="lg:col-span-4 space-y-5">
+                        <!-- Virtual Card -->
+                        <div class="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-base font-extrabold">B.O.S.S Virtual Card</h3>
+                                <span id="vc-badge" class="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full">Active</span>
+                            </div>
+                            <p class="text-[11px] text-slate-500">Use this Virtual Visa Card on Shopee, Lazada, or any online checkout to auto-split your bill.</p>
+                            <div id="vc-box" class="virtual-card-bg text-white p-5 rounded-2xl shadow-lg">
+                                <div class="flex justify-between mb-6"><span class="font-extrabold brand-font text-lg">B.O.S.S</span><i class="fa-solid fa-wifi rotate-90"></i></div>
+                                <p id="vc-num" class="font-mono text-sm sm:text-base font-bold tracking-widest mb-4">4532  ••••  ••••  8821</p>
+                                <div class="flex justify-between text-xs">
+                                    <div><p class="text-[9px] text-slate-400">CARDHOLDER</p><p id="vc-holder" class="font-bold">ALEX NGUYEN</p></div>
+                                    <div class="flex gap-3"><div><p class="text-[9px] text-slate-400">EXP</p><p class="font-mono font-bold">11/29</p></div><div><p class="text-[9px] text-slate-400">CVV</p><p id="vc-cvv" class="font-mono font-bold">•••</p></div></div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="toggleVcReveal()" id="vc-reveal-btn" class="py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold">Reveal Card</button>
+                                <button onclick="toggleVcFreeze()" id="vc-freeze-btn" class="py-2.5 rounded-xl bg-amber-50 dark:bg-amber-950 text-amber-800 dark:text-amber-300 text-xs font-bold">Freeze Card</button>
+                            </div>
+                        </div>
+
+                        <!-- Return & Refund -->
+                        <div class="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
+                            <h3 class="text-base font-extrabold">Return & Refund Tracking</h3>
+                            <form onsubmit="submitRefundRequest(event)" class="space-y-2">
+                                <select id="refund-order-select" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-semibold"></select>
+                                <input type="text" id="refund-reason" required placeholder="Reason for return/refund..." class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs">
+                                <button type="submit" class="w-full py-2.5 bg-indigo-600 text-white font-bold text-xs rounded-xl">Submit Return Request</button>
+                            </form>
+                            <div id="refund-requests-list" class="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
+                    <h3 class="text-base sm:text-lg font-extrabold mb-3">Completed Payment History</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-50 dark:bg-slate-800 text-slate-500 uppercase font-bold">
+                                <tr><th class="px-4 py-3">Receipt</th><th class="px-4 py-3">Date</th><th class="px-4 py-3">Description</th><th class="px-4 py-3">Amount</th><th class="px-4 py-3">Status</th></tr>
+                            </thead>
+                            <tbody id="payment-history-tbody" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB F: ACCOUNT & SECURITY -->
+            <div id="tab-account" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-7 bg-white dark:bg-slate-900 p-5 sm:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-5">
+                    <div class="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
+                        <h2 class="text-lg sm:text-xl font-extrabold">User Account & Personal Profile</h2>
+                        <button onclick="toggleTheme()" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold">Light / Dark</button>
+                    </div>
+                    <div class="flex flex-col sm:flex-row items-center gap-4 bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl">
+                        <img id="account-preview-avatar" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80" alt="Avatar" class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-blue-600 shrink-0">
+                        <div class="space-y-2 flex-1 w-full">
+                            <p class="text-xs font-extrabold">Select Avatar</p>
+                            <div class="flex flex-wrap gap-2" id="avatar-presets-box"></div>
+                        </div>
+                    </div>
+                    <form onsubmit="saveUserProfile(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div><label class="block text-xs font-bold mb-1">Full Name</label><input type="text" id="prof-name" required class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm"></div>
+                        <div><label class="block text-xs font-bold mb-1">Email</label><input type="email" id="prof-email" required class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm"></div>
+                        <div><label class="block text-xs font-bold mb-1">Phone</label><input type="text" id="prof-phone" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm"></div>
+                        <div><label class="block text-xs font-bold mb-1">Role / Occupation</label><input type="text" id="prof-role" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm"></div>
+                        <div class="sm:col-span-2"><label class="block text-xs font-bold mb-1">City</label><input type="text" id="prof-city" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm"></div>
+                        <div class="sm:col-span-2"><button type="submit" class="px-6 py-3 bg-blue-600 text-white font-extrabold text-xs rounded-xl">Save Profile Changes</button></div>
+                    </form>
+                </div>
+
+                <div class="lg:col-span-5 bg-white dark:bg-slate-900 p-5 sm:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+                    <h3 class="text-lg sm:text-xl font-extrabold">Security & Privacy Center</h3>
+                    <div class="space-y-3 text-xs">
+                        <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 flex justify-between items-center">
+                            <div><p class="font-bold">Two-Factor Authentication (2FA)</p><p class="text-slate-500">OTP verification for logins</p></div>
+                            <input type="checkbox" checked onchange="showToast('2FA updated', 'success')" class="w-4 h-4 accent-blue-600">
+                        </div>
+                        <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 flex justify-between items-center">
+                            <div><p class="font-bold">Biometric / PIN Checkout Lock</p><p class="text-slate-500">Verify identity before BNPL split</p></div>
+                            <input type="checkbox" checked onchange="showToast('Checkout lock updated', 'success')" class="w-4 h-4 accent-blue-600">
+                        </div>
+                        <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 flex justify-between items-center">
+                            <div><p class="font-bold">Zero Third-Party Data Sharing</p><p class="text-slate-500">Strict privacy protection</p></div>
+                            <input type="checkbox" checked onchange="showToast('Privacy setting updated', 'success')" class="w-4 h-4 accent-emerald-600">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB G: SUPPORT & B2B -->
+            <div id="tab-support" class="hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <div class="lg:col-span-6 bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+                        <h2 class="text-lg sm:text-xl font-extrabold">Help Center & FAQ</h2>
+                        <div class="space-y-2.5" id="faq-accordion"></div>
+                        <div class="flex gap-2 pt-2">
+                            <button onclick="openLegalModal('privacy')" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold">Privacy Policy</button>
+                            <button onclick="openLegalModal('terms')" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold">Terms of Service</button>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-6 bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
+                        <h2 class="text-lg sm:text-xl font-extrabold">Submit Support Request</h2>
+                        <form onsubmit="submitSupportTicket(event)" class="space-y-3">
+                            <select id="sup-type" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-semibold">
+                                <option>Shopee / Lazada Order Sync Question</option>
+                                <option>Billing & Installment Question</option>
+                                <option>Merchant Dispute / Complaint</option>
+                            </select>
+                            <textarea id="sup-desc" rows="3" required placeholder="Describe your issue..." class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs"></textarea>
+                            <button type="submit" class="w-full py-2.5 bg-blue-600 text-white font-extrabold text-xs rounded-xl">Submit Ticket</button>
+                        </form>
+                        <div id="support-tickets-list" class="space-y-2 max-h-40 overflow-y-auto"></div>
+                    </div>
+                </div>
+
+                <!-- B2B Merchant ROI Simulator -->
+                <div class="bg-slate-900 text-white rounded-2xl p-5 sm:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                    <div class="lg:col-span-7 space-y-4">
+                        <h3 class="text-lg sm:text-xl font-extrabold">B2B Merchant Growth & ROI Simulator (+28% AOV | -25% Dropped Carts)</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-white/5 p-4 rounded-xl">
+                            <div>
+                                <div class="flex justify-between text-xs font-bold mb-1"><span>Monthly Visitors:</span><span id="b2b-vis-lbl" class="text-emerald-400">20,000</span></div>
+                                <input type="range" id="b2b-vis" min="5000" max="100000" step="5000" value="20000" oninput="calcB2b()" class="w-full accent-emerald-400">
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs font-bold mb-1"><span>Current AOV:</span><span id="b2b-aov-lbl" class="text-blue-400">$150.00</span></div>
+                                <input type="range" id="b2b-aov" min="50" max="1000" step="25" value="150" oninput="calcB2b()" class="w-full accent-blue-400">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2.5 text-center">
+                            <div class="bg-white/10 p-3 rounded-xl"><p class="text-[10px] text-slate-300">Projected AOV</p><p id="b2b-res-aov" class="text-sm sm:text-base font-extrabold">$192.00</p></div>
+                            <div class="bg-white/10 p-3 rounded-xl"><p class="text-[10px] text-slate-300">Extra Monthly Rev</p><p id="b2b-res-rev" class="text-sm sm:text-base font-extrabold text-emerald-400">+$38,208</p></div>
+                            <div class="bg-white/10 p-3 rounded-xl"><p class="text-[10px] text-slate-300">Merchant Risk</p><p class="text-sm sm:text-base font-extrabold text-blue-400">0.00%</p></div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-5 bg-white text-slate-900 p-5 rounded-2xl">
+                        <h4 class="text-base font-extrabold mb-2">Become a Shopee / Lazada Partner</h4>
+                        <form onsubmit="submitB2bPartner(event)" class="space-y-2.5">
+                            <input type="text" required placeholder="Store Name (Shopee / Lazada)" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs">
+                            <input type="email" required placeholder="Business Email" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs">
+                            <button type="submit" class="w-full py-2.5 bg-slate-900 text-white font-bold text-xs rounded-xl">Request Checkout API Key</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- MOBILE FIXED BOTTOM TAB BAR -->
+    <nav id="mobile-bottom-nav" class="hidden xl:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-1 py-1.5 shadow-lg">
+        <div class="grid grid-cols-6 gap-0.5 text-center">
+            <button onclick="switchTab('dashboard')" data-tab="dashboard" class="mob-tab-btn flex flex-col items-center justify-center py-1 rounded-xl text-[10px] font-bold text-blue-600">
+                <i class="fa-solid fa-chart-pie text-sm mb-0.5"></i><span>Home</span>
+            </button>
+            <button onclick="switchTab('discovery')" data-tab="discovery" class="mob-tab-btn flex flex-col items-center justify-center py-1 rounded-xl text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                <i class="fa-solid fa-bag-shopping text-sm mb-0.5"></i><span>Stores</span>
+            </button>
+            <button onclick="switchTab('planner')" data-tab="planner" class="mob-tab-btn flex flex-col items-center justify-center py-1 rounded-xl text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                <i class="fa-solid fa-link text-sm mb-0.5"></i><span>Link/Split</span>
+            </button>
+            <button onclick="switchTab('calendar')" data-tab="calendar" class="mob-tab-btn flex flex-col items-center justify-center py-1 rounded-xl text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                <i class="fa-solid fa-calendar-check text-sm mb-0.5"></i><span>Calendar</span>
+            </button>
+            <button onclick="switchTab('payments')" data-tab="payments" class="mob-tab-btn flex flex-col items-center justify-center py-1 rounded-xl text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                <i class="fa-solid fa-credit-card text-sm mb-0.5"></i><span>Pay</span>
+            </button>
+            <button onclick="switchTab('support')" data-tab="support" class="mob-tab-btn flex flex-col items-center justify-center py-1 rounded-xl text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                <i class="fa-solid fa-headset text-sm mb-0.5"></i><span>B2B/Help</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-950 text-slate-300 border-t border-slate-800 mt-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pb-6 border-b border-slate-800 text-xs">
+                <div class="space-y-1.5">
+                    <p class="text-lg sm:text-xl font-extrabold text-white brand-font">B.O.S.S — Buy On Smart Schedule</p>
+                    <p class="text-emerald-400 font-bold">"Buy Now, Pay Smart – Your Future, Your Choice!"</p>
+                </div>
+                <div class="md:col-span-2 bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1">
+                    <p class="text-sm font-extrabold text-white">B.O.S.S FinTech Solutions JSC</p>
+                    <p><strong>Address:</strong> University of Economics - The University of Da Nang</p>
+                    <p><strong>Phone:</strong> 0234567891 &nbsp;|&nbsp; <strong>Email:</strong> bosseap2dan@gmail.com</p>
+                </div>
+            </div>
+            <p class="pt-4 text-center text-xs text-slate-500">© 2026 B.O.S.S FinTech Solutions JSC • EAP 2 Group 6 Portfolio.</p>
+        </div>
+    </footer>
+
+    <!-- MODALS -->
+    <div id="auth-modal" class="fixed inset-0 z-50 hidden bg-slate-950/75 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 relative">
+            <button onclick="closeModal('auth-modal')" class="absolute top-4 right-4 w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="text-xl font-extrabold mb-1">Sign In with Email</h3>
+            <p class="text-xs text-slate-500 mb-4">Complete the 3-step survey to calibrate your B.O.S.S credit limit.</p>
+            <form onsubmit="submitEmailLogin(event)" class="space-y-3">
+                <input type="email" id="login-email-input" required placeholder="student@due.udn.vn" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm">
+                <input type="password" required value="BossSmart2026" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm">
+                <button type="submit" class="w-full py-3 bg-blue-600 text-white font-extrabold text-sm rounded-xl">Continue to 3-Step Survey →</button>
+            </form>
+            <button onclick="quickDemoLogin()" class="w-full mt-3 py-2.5 bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold text-xs rounded-xl">Skip Survey: Instant Demo Login</button>
+        </div>
+    </div>
+
+    <div id="ekyc-modal" class="fixed inset-0 z-50 hidden bg-slate-950/75 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 relative">
+            <button onclick="closeModal('ekyc-modal')" class="absolute top-4 right-4 w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="text-xl font-extrabold mb-1">Instant 60s e-KYC Verification</h3>
+            <p class="text-xs text-slate-500 mb-4">Double your B.O.S.S credit limit immediately.</p>
+            <form onsubmit="completeEkycUpgrade(event)" class="space-y-3">
+                <input type="text" id="ekyc-name-input" required placeholder="Full Legal Name" value="Alex Nguyen" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm">
+                <input type="text" required value="048204009912" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm">
+                <button type="submit" class="w-full py-3 bg-blue-600 text-white font-extrabold text-sm rounded-xl">Verify & Double Limit</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="legal-modal" class="fixed inset-0 z-50 hidden bg-slate-950/75 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 relative max-h-[80vh] overflow-y-auto">
+            <button onclick="closeModal('legal-modal')" class="absolute top-4 right-4 w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+            <h3 id="legal-modal-title" class="text-lg font-extrabold mb-2">Policy</h3>
+            <div id="legal-modal-body" class="text-xs text-slate-600 dark:text-slate-300 space-y-2 leading-relaxed"></div>
+        </div>
+    </div>
+
+    <script>
+        const VND_RATE = 25000;
+
+        const AVATAR_PRESETS = [
+            'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
+            'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80',
+            'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80'
+        ];
+
+        const PRODUCTS_CATALOG = [
+            { id: 'prod-cam', platform: 'Shopee', title: 'Sony Alpha Mirrorless Camera (15M VND Pitch Item)', category: 'Technology', merchant: 'Sony Center Official • Shopee Mall', price: 600, img: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=800&q=80' },
+            { id: 'prod-1', platform: 'Lazada', title: 'Apple MacBook Air M3 13" (16GB/512GB)', category: 'Technology', merchant: 'Apple Flagship Store • LazMall', price: 1200, img: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80' },
+            { id: 'prod-2', platform: 'Shopee', title: 'Sony WH-1000XM5 Noise Canceling Headphones', category: 'Technology', merchant: 'Sony Audio Official • Shopee Mall', price: 360, img: 'https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?auto=format&fit=crop&w=800&q=80' },
+            { id: 'prod-3', platform: 'Lazada', title: 'Executive Tailored Blazer & Trench Coat Set', category: 'Fashion', merchant: 'Zara & Aristino • LazMall', price: 280, img: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=800&q=80' },
+            { id: 'prod-4', platform: 'Shopee', title: 'LG Smart Inverter Washer & Dryer Combo', category: 'Home Appliances', merchant: 'LG Electronics • Shopee Mall', price: 720, img: 'https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?auto=format&fit=crop&w=800&q=80' },
+            { id: 'prod-5', platform: 'Lazada', title: 'Dyson V15 Detect Cordless Smart Vacuum', category: 'Home Appliances', merchant: 'Dyson Vietnam • LazMall', price: 600, img: 'https://images.unsplash.com/photo-1558317374-067fb5f30001?auto=format&fit=crop&w=800&q=80' }
+        ];
+
+        function getInitialState() {
+            return {
+                isLoggedIn: false,
+                darkMode: false,
+                currency: 'USD',
+                activeTab: 'dashboard',
+                surveyStep: 1,
+                user: { name: 'Alex Nguyen', email: 'bosseap2dan@gmail.com', phone: '0905 123 456', role: 'Young Professional & DUE Student', city: 'Da Nang City, Vietnam', avatar: AVATAR_PRESETS[1] },
+                isKycVerified: false,
+                totalLimit: 2500,
+                availableLimit: 1690,
+                survey: { interests: ['Technology', 'Home Appliances'], usedBefore: 'Yes, experienced BNPL user', enjoyment: 'Love it (5/5)', purposes: ['Tech Upgrades', 'Home Appliances'], frequency: '1–2 times / month', monthlySafeCap: 600 },
+                installments: [
+                    { id: 'BOSS-9042', platform: 'Lazada', title: 'Apple MacBook Air M3 13"', category: 'Technology', merchant: 'Apple Flagship • LazMall', totalAmount: 1080, months: 4, paidCount: 1, monthlyAmount: 270, status: 'Upcoming', nextDueDate: '2026-12-13', autoPay: true },
+                    { id: 'BOSS-8815', platform: 'Shopee', title: 'Executive Tailored Blazer Set', category: 'Fashion', merchant: 'Aristino • Shopee Mall', totalAmount: 180, months: 3, paidCount: 2, monthlyAmount: 60, status: 'Overdue', nextDueDate: '2026-11-10', autoPay: false }
+                ],
+                paymentHistory: [
+                    { receiptId: 'RCP-7721', date: '2026-11-13', desc: '[LazMall] Split 1/4 — Apple MacBook Air M3 13"', amount: 270.00, status: 'Paid' },
+                    { receiptId: 'RCP-7690', date: '2026-10-10', desc: '[Shopee Mall] Split 2/3 — Executive Blazer Set', amount: 60.00, status: 'Paid' },
+                    { receiptId: 'RCP-7512', date: '2026-09-10', desc: '[Shopee Mall] Split 1/3 — Executive Blazer Set', amount: 60.00, status: 'Paid' }
+                ],
+                calendarView: { year: 2026, month: 10, selectedDate: '2026-11-13' },
+                calendarEntries: [
+                    { id: 'ce-1', date: '2026-11-13', source: 'auto', kind: 'purchase', title: '[LazMall] MacBook Air M3 (Split 1/4 Paid)', amount: 270 },
+                    { id: 'ce-2', date: '2026-12-13', source: 'auto', kind: 'due', title: 'Due Date: MacBook Air M3 (Split 2/4)', amount: 270 },
+                    { id: 'ce-3', date: '2027-01-13', source: 'auto', kind: 'due', title: 'Due Date: MacBook Air M3 (Split 3/4)', amount: 270 },
+                    { id: 'ce-4', date: '2026-11-10', source: 'auto', kind: 'overdue', title: '[Shopee] Overdue Split 3/3: Executive Blazer', amount: 60 },
+                    { id: 'ce-5', date: '2026-11-05', source: 'manual', kind: 'Income / Payday', title: 'Monthly Salary Credited — Keep BNPL within Safe Cap', amount: 1850 },
+                    { id: 'ce-6', date: '2026-11-13', source: 'manual', kind: 'Budget Reminder', title: 'EAP 2 Product Launch Demo Day — DUE Da Nang!', amount: 0 }
+                ],
+                refundRequests: [
+                    { id: 'RMA-301', orderId: 'BOSS-8815', reason: 'Exchange jacket sleeve sizing on Shopee', status: 'Under Merchant Review' }
+                ],
+                supportTickets: [
+                    { id: 'TKT-104', type: 'Shopee / Lazada Order Sync Question', subject: 'Confirming 0% APR on Shopee Mall & LazMall 4-month splits', status: 'Resolved' }
+                ],
+                prodFilter: { filter: 'All' },
+                planner: { amount: 600, months: 3, platform: 'Shopee' },
+                virtualCard: { revealed: false, frozen: false },
+                paymentFilter: 'ALL'
+            };
+        }
+
+        let state = loadState();
+        let cashflowChartInstance = null;
+        let categoryChartInstance = null;
+
+        function loadState() {
+            try { const raw = localStorage.getItem('boss_fintech_state_v6'); if (raw) return JSON.parse(raw); } catch (e) {}
+            return getInitialState();
+        }
+        function saveState() { try { localStorage.setItem('boss_fintech_state_v6', JSON.stringify(state)); } catch (e) {} }
+
+        function formatMoney(usdAmount, compact = false) {
+            const val = Number(usdAmount) || 0;
+            if (state.currency === 'VND') {
+                const vnd = Math.round(val * VND_RATE);
+                if (compact && vnd >= 1000000) {
+                    return `${(vnd / 1000000).toFixed(vnd % 1000000 === 0 ? 0 : 1)}M ₫`;
+                }
+                return `${vnd.toLocaleString('vi-VN')} ₫`;
+            }
+            return `$${val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }
+
+        function setCurrency(curr) {
+            state.currency = curr;
+            saveState();
+            updateCurrencyUI();
+            updateHeroCalc();
+            if (state.isLoggedIn) {
+                updateHeaderUserBadge();
+                if (state.activeTab === 'dashboard') refreshDashboard();
+                if (state.activeTab === 'calendar') renderCalendar();
+                if (state.activeTab === 'discovery') renderProducts();
+                if (state.activeTab === 'planner') refreshPlanner();
+                if (state.activeTab === 'payments') refreshPaymentsTab();
+                if (state.activeTab === 'support') calcB2b();
+            }
+            showToast(`Switched currency to ${curr === 'VND' ? 'Vietnamese Dong (₫ VND)' : 'US Dollar ($ USD)'}`, 'info');
+        }
+
+        function updateCurrencyUI() {
+            const isVnd = state.currency === 'VND';
+            const btnUsd = document.getElementById('curr-btn-USD');
+            const btnVnd = document.getElementById('curr-btn-VND');
+            if (btnUsd && btnVnd) {
+                btnUsd.className = !isVnd ? 'px-2 py-1 rounded-lg text-[11px] font-extrabold transition bg-white dark:bg-slate-900 text-blue-600 shadow-2xs' : 'px-2 py-1 rounded-lg text-[11px] font-extrabold transition text-slate-500 dark:text-slate-400';
+                btnVnd.className = isVnd ? 'px-2 py-1 rounded-lg text-[11px] font-extrabold transition bg-white dark:bg-slate-900 text-blue-600 shadow-2xs' : 'px-2 py-1 rounded-lg text-[11px] font-extrabold transition text-slate-500 dark:text-slate-400';
+            }
+        }
+
+        function resetDemoState() {
+            localStorage.removeItem('boss_fintech_state_v6');
+            const keepCurrency = state.currency;
+            const keepDark = state.darkMode;
+            state = getInitialState();
+            state.currency = keepCurrency;
+            state.darkMode = keepDark;
+            applyTheme(); updateCurrencyUI(); syncAuthUI(); updateHeroCalc();
+            showToast('Demo data reset to clean initial state.', 'info');
+        }
+
+        window.onload = function () {
+            applyTheme(); updateCurrencyUI(); updateHeroCalc(); syncAuthUI(); renderAvatarPresets(); renderFaqAccordion(); calcB2b();
+        };
+
+        function toggleTheme() {
+            state.darkMode = !state.darkMode; applyTheme(); saveState();
+            if (state.isLoggedIn && state.activeTab === 'dashboard') renderCharts();
+        }
+        function applyTheme() {
+            document.documentElement.classList.toggle('dark', state.darkMode);
+            const icon = document.getElementById('theme-icon');
+            if (icon) icon.className = state.darkMode ? 'fa-solid fa-sun text-xs sm:text-sm' : 'fa-solid fa-moon text-xs sm:text-sm';
+        }
+
+        function showToast(msg, type = 'success') {
+            const box = document.getElementById('toast-container');
+            const el = document.createElement('div');
+            const colors = { success: 'bg-slate-900 text-white border-l-4 border-emerald-400', info: 'bg-slate-900 text-white border-l-4 border-blue-400', warning: 'bg-amber-950 text-white border-l-4 border-amber-400', error: 'bg-rose-950 text-white border-l-4 border-rose-500' };
+            el.className = `${colors[type]} p-3 rounded-xl shadow-2xl text-xs font-medium pointer-events-auto animate-slide-up flex items-center gap-2`;
+            el.innerHTML = `<i class="fa-solid fa-circle-info text-emerald-400 shrink-0"></i><span>${msg}</span>`;
+            box.appendChild(el);
+            setTimeout(() => el.remove(), 3500);
+        }
+
+        function updateHeroCalc() {
+            const val = parseFloat(document.getElementById('hero-calc-slider').value);
+            document.getElementById('hero-calc-val').textContent = formatMoney(val);
+            document.getElementById('hero-calc-3').textContent = formatMoney(val / 3, true);
+            document.getElementById('hero-calc-4').textContent = formatMoney(val / 4, true);
+            document.getElementById('hero-calc-6').textContent = formatMoney((val * 1.025) / 6, true);
+        }
+
+        function handleBrandClick() {
+            if (state.isLoggedIn) { showMainView('workspace'); switchTab('dashboard'); } else { showMainView('landing'); }
+        }
+        function openAuthModal() { document.getElementById('auth-modal').classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        function submitEmailLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email-input').value.trim();
+            if (!email) return;
+            const namePart = email.split('@')[0];
+            state.user.email = email;
+            state.user.name = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+            state.isLoggedIn = true; state.surveyStep = 1;
+            closeModal('auth-modal'); saveState(); syncAuthUI(); renderSurvey(); showMainView('survey');
+            showToast(`Welcome ${state.user.name}! Complete your 3-step profile.`, 'info');
+        }
+
+        function quickDemoLogin() {
+            state.user.email = 'bosseap2dan@gmail.com';
+            state.user.name = 'Alex Nguyen';
+            state.isLoggedIn = true;
+            closeModal('auth-modal');
+            saveState();
+            syncAuthUI();
+            showMainView('workspace');
+            switchTab('dashboard');
+            showToast('Welcome to B.O.S.S! Tap "Shopee & Lazada" or "Link & Planner" to test e-commerce integration.', 'success');
+        }
+
+        function logoutUser() { state.isLoggedIn = false; saveState(); syncAuthUI(); showMainView('landing'); }
+
+        function syncAuthUI() {
+            const guestBox = document.getElementById('header-guest-box');
+            const userBox = document.getElementById('header-user-box');
+            const dNav = document.getElementById('desktop-nav');
+            const mBottomNav = document.getElementById('mobile-bottom-nav');
+            if (state.isLoggedIn) {
+                guestBox.classList.add('hidden'); userBox.classList.remove('hidden'); userBox.classList.add('flex');
+                dNav.classList.remove('hidden'); mBottomNav.classList.remove('hidden');
+                updateHeaderUserBadge(); showMainView('workspace'); switchTab(state.activeTab || 'dashboard');
+            } else {
+                guestBox.classList.remove('hidden'); userBox.classList.add('hidden'); userBox.classList.remove('flex');
+                dNav.classList.add('hidden'); mBottomNav.classList.add('hidden');
+                showMainView('landing');
+            }
+        }
+        function updateHeaderUserBadge() {
+            document.getElementById('header-avatar-img').src = state.user.avatar;
+            document.getElementById('header-user-name').textContent = state.user.name;
+            document.getElementById('header-credit-label').textContent = `${formatMoney(state.availableLimit, true)} Avail.`;
+            document.getElementById('vc-holder').textContent = state.user.name.toUpperCase();
+        }
+        function showMainView(viewName) {
+            ['view-landing', 'view-survey', 'view-workspace'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            document.getElementById(`view-${viewName}`).classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        function switchTab(tabName) {
+            state.activeTab = tabName; saveState();
+            ['dashboard', 'calendar', 'discovery', 'planner', 'payments', 'account', 'support'].forEach(t => document.getElementById(`tab-${t}`).classList.add('hidden'));
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+
+            document.querySelectorAll('.app-nav-btn').forEach(btn => {
+                const isMatch = btn.getAttribute('data-tab') === tabName;
+                btn.classList.toggle('bg-white', isMatch); btn.classList.toggle('dark:bg-slate-900', isMatch);
+                btn.classList.toggle('text-slate-900', isMatch); btn.classList.toggle('dark:text-white', isMatch);
+            });
+            document.querySelectorAll('.mob-tab-btn').forEach(btn => {
+                const isMatch = btn.getAttribute('data-tab') === tabName;
+                btn.classList.toggle('text-blue-600', isMatch);
+                btn.classList.toggle('bg-blue-50/70', isMatch);
+                btn.classList.toggle('dark:bg-blue-950/50', isMatch);
+                btn.classList.toggle('text-slate-500', !isMatch);
+            });
+
+            if (tabName === 'dashboard') refreshDashboard();
+            if (tabName === 'calendar') renderCalendar();
+            if (tabName === 'discovery') renderProducts();
+            if (tabName === 'planner') refreshPlanner();
+            if (tabName === 'payments') refreshPaymentsTab();
+            if (tabName === 'account') refreshAccountTab();
+            if (tabName === 'support') refreshSupportTab();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // SURVEY
+        const SURVEY_CATS = [
+            { name: 'Technology', icon: 'fa-laptop', desc: 'Cameras, laptops, smartphones & audio' },
+            { name: 'Fashion', icon: 'fa-shirt', desc: 'Executive apparel, shoes & accessories' },
+            { name: 'Home Appliances', icon: 'fa-blender-phone', desc: 'Washers, vacuums & smart kitchen' },
+            { name: 'Transportation', icon: 'fa-motorcycle', desc: 'Electric scooters, e-bikes & commuting' },
+            { name: 'Education & Workspace', icon: 'fa-graduation-cap', desc: 'Courses, ergonomic desks & monitors' },
+            { name: 'Lifestyle', icon: 'fa-compass', desc: 'Fitness, travel & wellness essentials' }
+        ];
+        const SURVEY_PURPOSES = ['Home Appliances', 'Vehicles / Transportation', 'Housing / Furniture', 'Tech Upgrades', 'Everyday Cash Flow', 'Education & Career'];
+
+        function reopenSurvey() { state.surveyStep = 1; renderSurvey(); showMainView('survey'); }
+        function renderSurvey() {
+            const step = state.surveyStep;
+            document.getElementById('survey-badge').textContent = `Step ${step} of 3`;
+            document.getElementById('survey-bar').style.width = `${(step / 3) * 100}%`;
+            [1, 2, 3].forEach(s => document.getElementById(`survey-step-${s}`).classList.toggle('hidden', s !== step));
+            document.getElementById('survey-step-1').innerHTML = SURVEY_CATS.map(c => {
+                const active = state.survey.interests.includes(c.name);
+                return `<div onclick="toggleSurveyInterest('${c.name}')" class="p-4 rounded-xl border-2 cursor-pointer transition flex items-start gap-3 ${active ? 'border-blue-600 bg-blue-50/70 dark:bg-blue-950/40' : 'border-slate-200 dark:border-slate-700'}">
+                    <div class="w-10 h-10 rounded-lg ${active ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-slate-800'} flex items-center justify-center shrink-0"><i class="fa-solid ${c.icon}"></i></div>
+                    <div class="flex-1"><div class="flex justify-between items-center"><p class="font-extrabold text-sm">${c.name}</p><i class="fa-solid fa-circle-check ${active ? 'text-blue-600' : 'text-slate-300'}"></i></div><p class="text-xs text-slate-500 mt-0.5">${c.desc}</p></div>
+                </div>`;
+            }).join('');
+            document.getElementById('survey-purposes-grid').innerHTML = SURVEY_PURPOSES.map(p => {
+                const active = state.survey.purposes.includes(p);
+                return `<button type="button" onclick="toggleSurveyPurpose('${p}')" class="p-3 rounded-xl border-2 text-left text-xs font-bold ${active ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300' : 'border-slate-200 dark:border-slate-700'}">${p}</button>`;
+            }).join('');
+            document.querySelectorAll('.s-radio-btn').forEach(btn => {
+                const isSel = state.survey[btn.getAttribute('data-sgroup')] === btn.getAttribute('data-sval');
+                btn.classList.toggle('border-blue-600', isSel);
+                btn.classList.toggle('bg-blue-50/50', isSel);
+                btn.classList.toggle('dark:bg-blue-950/40', isSel);
+                btn.classList.toggle('border-slate-200', !isSel);
+                btn.classList.toggle('dark:border-slate-700', !isSel);
+            });
+            document.getElementById('survey-cap-display').textContent = formatMoney(state.survey.monthlySafeCap);
+            document.getElementById('survey-cap-slider').value = state.survey.monthlySafeCap;
+            document.getElementById('survey-back-btn').classList.toggle('hidden', step === 1);
+            document.getElementById('survey-next-btn').textContent = step === 3 ? 'Complete & Open Dashboard ✓' : 'Next Step →';
+        }
+        function toggleSurveyInterest(name) {
+            const idx = state.survey.interests.indexOf(name);
+            if (idx > -1) { if (state.survey.interests.length > 1) state.survey.interests.splice(idx, 1); } else state.survey.interests.push(name);
+            renderSurvey();
+        }
+        function toggleSurveyPurpose(name) {
+            const idx = state.survey.purposes.indexOf(name);
+            if (idx > -1) state.survey.purposes.splice(idx, 1); else state.survey.purposes.push(name);
+            renderSurvey();
+        }
+        function setSurveyField(field, val) { state.survey[field] = val; renderSurvey(); }
+        function syncSurveyCap(val) {
+            state.survey.monthlySafeCap = parseInt(val);
+            document.getElementById('survey-cap-display').textContent = formatMoney(state.survey.monthlySafeCap);
+        }
+        function stepSurvey(dir) {
+            if (dir === 1 && state.surveyStep < 3) { state.surveyStep++; renderSurvey(); }
+            else if (dir === -1 && state.surveyStep > 1) { state.surveyStep--; renderSurvey(); }
+            else if (dir === 1 && state.surveyStep === 3) {
+                saveState(); showMainView('workspace'); switchTab('dashboard');
+                showToast(`Preferences saved! Monthly Safe Cap: ${formatMoney(state.survey.monthlySafeCap)}/mo.`, 'success');
+            }
+        }
+
+        // DASHBOARD
+        function refreshDashboard() {
+            document.getElementById('dash-avatar').src = state.user.avatar;
+            document.getElementById('dash-name').textContent = state.user.name;
+            document.getElementById('kpi-avail-credit').textContent = formatMoney(state.availableLimit);
+            document.getElementById('kpi-total-limit').textContent = formatMoney(state.totalLimit, true);
+            if (state.isKycVerified) {
+                document.getElementById('dash-kyc-pill').textContent = `e-KYC Verified (${formatMoney(5000, true)})`;
+                document.getElementById('dash-kyc-pill').className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800';
+                document.getElementById('dash-kyc-btn').classList.add('hidden');
+                document.getElementById('kpi-boost-link').classList.add('hidden');
+            }
+            let payable = 0, monthlyLoad = 0, activeCount = 0;
+            state.installments.forEach(p => {
+                const rem = p.months - p.paidCount;
+                if (rem > 0) { activeCount++; payable += rem * p.monthlyAmount; monthlyLoad += p.monthlyAmount; }
+            });
+            document.getElementById('kpi-payable-balance').textContent = formatMoney(payable);
+            document.getElementById('kpi-active-count').textContent = `${activeCount} active installment plan(s)`;
+            document.getElementById('kpi-monthly-load').textContent = formatMoney(monthlyLoad);
+
+            const cap = state.survey.monthlySafeCap;
+            document.getElementById('kpi-safe-cap-text').textContent = `Safe Cap: ${formatMoney(cap, true)} / mo`;
+            document.getElementById('dash-budget-slider').value = cap;
+            document.getElementById('dash-budget-slider-val').textContent = `${formatMoney(cap, true)} / mo`;
+            document.getElementById('guardrail-used-lbl').textContent = formatMoney(monthlyLoad);
+            document.getElementById('guardrail-max-lbl').textContent = formatMoney(cap);
+
+            const pct = Math.min(100, Math.round((monthlyLoad / cap) * 100));
+            const fill = document.getElementById('guardrail-fill');
+            const pill = document.getElementById('guardrail-pill');
+            const msg = document.getElementById('guardrail-msg');
+            fill.style.width = `${pct}%`;
+            if (monthlyLoad > cap) {
+                fill.className = 'bg-rose-500 h-full transition-all';
+                pill.className = 'px-3 py-1 rounded-full text-xs font-extrabold bg-rose-100 text-rose-800';
+                pill.textContent = `Over Cap (${Math.round((monthlyLoad / cap) * 100)}%)`;
+                msg.textContent = `Warning: Monthly commitments exceed your ${formatMoney(cap)}/mo safe limit.`;
+            } else {
+                fill.className = 'bg-emerald-500 h-full transition-all';
+                pill.className = 'px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800';
+                pill.textContent = `Healthy (${pct}%)`;
+                msg.textContent = `You have ${formatMoney(cap - monthlyLoad)}/mo of safe repayment headroom remaining.`;
+            }
+
+            const overdueCount = state.installments.filter(i => i.status === 'Overdue' && i.paidCount < i.months).length;
+            document.getElementById('smart-insights-list').innerHTML = `
+                <div class="p-3 rounded-xl bg-blue-50/70 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900">
+                    <p class="font-bold text-blue-800 dark:text-blue-300">Shopee & Lazada Checkout Active</p>
+                    <p class="text-slate-600 dark:text-slate-400 mt-0.5">0% APR on 3 & 4-month split plans across all partner stores.</p>
+                </div>
+                <div class="p-3 rounded-xl ${overdueCount > 0 ? 'bg-rose-50 dark:bg-rose-950/40 border border-rose-200' : 'bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-100'}">
+                    <p class="font-bold ${overdueCount > 0 ? 'text-rose-700' : 'text-emerald-700'}">${overdueCount > 0 ? `${overdueCount} Overdue Split Needs Attention` : 'All Installments On Schedule'}</p>
+                    <p class="text-slate-600 dark:text-slate-400 mt-0.5">${overdueCount > 0 ? 'Settle overdue splits in the Pay tab to protect your score.' : 'Zero late fees across all active plans.'}</p>
+                </div>`;
+            renderCharts();
+        }
+        function updateMonthlySafeCap(val) { state.survey.monthlySafeCap = parseInt(val); saveState(); refreshDashboard(); }
+
+        function renderCharts() {
+            const mult = state.currency === 'VND' ? VND_RATE : 1;
+            const unitLabel = state.currency === 'VND' ? 'VND' : '$';
+            const textColor = state.darkMode ? '#CBD5E1' : '#475569';
+            const gridColor = state.darkMode ? 'rgba(148, 163, 184, 0.12)' : 'rgba(148, 163, 184, 0.2)';
+            const ctx1 = document.getElementById('monthlyCashflowChart');
+            if (ctx1 && typeof Chart !== 'undefined') {
+                if (cashflowChartInstance) cashflowChartInstance.destroy();
+                cashflowChartInstance = new Chart(ctx1, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov 2026'],
+                        datasets: [
+                            { label: `BNPL Purchases (${unitLabel})`, data: [220, 410, 180, 350, 290, 1080].map(v => v * mult), backgroundColor: '#2563EB', borderRadius: 6 },
+                            { label: `Repayments (${unitLabel})`, data: [180, 240, 260, 290, 310, 330].map(v => v * mult), backgroundColor: '#10B981', borderRadius: 6 }
+                        ]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: textColor } } }, scales: { x: { ticks: { color: textColor } }, y: { ticks: { color: textColor }, grid: { color: gridColor } } } }
+                });
+            }
+            const ctx2 = document.getElementById('categoryDoughnutChart');
+            if (ctx2 && typeof Chart !== 'undefined') {
+                if (categoryChartInstance) categoryChartInstance.destroy();
+                const catTotals = { Technology: 1080 * mult, Fashion: 180 * mult, 'Home Appliances': 320 * mult, Transportation: 240 * mult };
+                state.installments.forEach(inst => { if (inst.id !== 'BOSS-9042' && inst.id !== 'BOSS-8815') catTotals[inst.category] = (catTotals[inst.category] || 0) + (inst.totalAmount * mult); });
+                categoryChartInstance = new Chart(ctx2, {
+                    type: 'doughnut',
+                    data: { labels: Object.keys(catTotals), datasets: [{ data: Object.values(catTotals), backgroundColor: ['#2563EB', '#EC4899', '#10B981', '#F59E0B'], borderWidth: 0 }] },
+                    options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom', labels: { color: textColor } } } }
+                });
+            }
+        }
+
+        // SHOPEE & LAZADA CATALOG
+        function setProdFilter(filterVal, btnEl) {
+            state.prodFilter.filter = filterVal;
+            document.querySelectorAll('.p-cat-btn').forEach(b => {
+                b.className = 'p-cat-btn px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 shrink-0';
+            });
+            btnEl.className = 'p-cat-btn px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-900 dark:bg-blue-600 text-white shrink-0';
+            renderProducts();
+        }
+
+        function renderProducts() {
+            const query = (document.getElementById('prod-search').value || '').toLowerCase();
+            const f = state.prodFilter.filter;
+            const list = PRODUCTS_CATALOG.filter(p => {
+                const isRec = state.survey.interests.includes(p.category);
+                if (f === 'Shopee' && p.platform !== 'Shopee') return false;
+                if (f === 'Lazada' && p.platform !== 'Lazada') return false;
+                if (f === 'Recommended' && !isRec) return false;
+                if (['Technology', 'Fashion', 'Home Appliances'].includes(f) && p.category !== f) return false;
+                return p.title.toLowerCase().includes(query) || p.merchant.toLowerCase().includes(query) || p.platform.toLowerCase().includes(query);
+            });
+
+            document.getElementById('products-grid').innerHTML = list.map(p => {
+                const isShopee = p.platform === 'Shopee';
+                const badgeStyle = isShopee ? 'shopee-gradient' : 'lazada-gradient';
+                const btnStyle = isShopee ? 'bg-[#EE4D2D] hover:bg-[#d94123]' : 'bg-indigo-700 hover:bg-indigo-600';
+                return `<div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xs flex flex-col justify-between">
+                    <div>
+                        <div class="relative h-44 sm:h-48 bg-slate-200 overflow-hidden">
+                            <img src="${p.img}" alt="${p.title}" class="w-full h-full object-cover">
+                            <span class="absolute top-3 left-3 px-2.5 py-1 ${badgeStyle} text-white text-[10px] font-extrabold rounded-lg shadow flex items-center gap-1">
+                                <i class="fa-solid ${isShopee ? 'fa-bag-shopping' : 'fa-store'}"></i>${isShopee ? 'Shopee Mall' : 'LazMall'}
+                            </span>
+                            <span class="absolute bottom-3 right-3 px-2.5 py-1 bg-slate-900/80 text-white text-[10px] font-bold rounded-md">${p.category}</span>
+                        </div>
+                        <div class="p-4 sm:p-5 space-y-2">
+                            <p class="text-[11px] font-bold text-slate-400 uppercase">${p.merchant}</p>
+                            <h3 class="font-extrabold text-sm sm:text-base leading-snug">${p.title}</h3>
+                            <div class="pt-2 flex items-baseline justify-between gap-2">
+                                <span class="text-lg sm:text-xl font-extrabold">${formatMoney(p.price, true)}</span>
+                                <span class="text-xs font-bold text-emerald-600">3 × ${formatMoney(p.price / 3, true)} (0% APR)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4 sm:p-5 pt-0">
+                        <button onclick="openProductInPlanner('${p.id}')" class="w-full py-3 ${btnStyle} text-white font-extrabold text-xs rounded-xl transition flex items-center justify-center gap-1.5">
+                            <span>Buy on ${p.platform} • Split with B.O.S.S</span><i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function openProductInPlanner(prodId) {
+            const p = PRODUCTS_CATALOG.find(item => item.id === prodId);
+            if (!p) return;
+            document.getElementById('planner-item-title').value = p.title;
+            document.getElementById('planner-item-cat').value = p.category;
+            document.getElementById('planner-platform-select').value = p.platform;
+            updatePlannerPlatformBadge(p.platform);
+            state.planner.amount = p.price;
+            state.planner.months = 3;
+            switchTab('planner');
+            showToast(`Loaded "${p.title}" from ${p.platform} into B.O.S.S Checkout!`, 'info');
+        }
+
+        // SMART LINK IMPORTER & PLANNER
+        function fillSampleLink(platform) {
+            const urlInput = document.getElementById('ecom-url-input');
+            if (platform === 'shopee') {
+                urlInput.value = 'https://shopee.vn/May-Anh-Sony-Alpha-Mirrorless-15Tr-i.889120.44912';
+            } else {
+                urlInput.value = 'https://www.lazada.vn/products/apple-macbook-air-m3-13-inch-lazmall-i2590184.html';
+            }
+            importEcommerceLink({ preventDefault: () => {} });
+        }
+
+        function importEcommerceLink(e) {
+            e.preventDefault();
+            const rawUrl = (document.getElementById('ecom-url-input').value || '').trim().toLowerCase();
+            if (!rawUrl) {
+                showToast('Please paste a Shopee or Lazada link (or tap a sample link button).', 'warning');
+                return;
+            }
+            let platform = 'Shopee';
+            let title = 'Imported Shopee Mall Item';
+            let price = 480;
+            let cat = 'Technology';
+
+            if (rawUrl.includes('lazada')) {
+                platform = 'Lazada';
+                title = rawUrl.includes('macbook') ? 'Apple MacBook Air M3 13" (LazMall Official)' : 'LazMall Smart Home & Tech Bundle';
+                price = rawUrl.includes('macbook') ? 1200 : 540;
+            } else if (rawUrl.includes('shopee')) {
+                platform = 'Shopee';
+                title = rawUrl.includes('sony') || rawUrl.includes('camera') ? 'Sony Alpha Mirrorless Camera (Shopee Mall 15M VND)' : 'Shopee Mall Lifestyle & Gadget Deal';
+                price = (rawUrl.includes('sony') || rawUrl.includes('camera')) ? 600 : 360;
+            } else {
+                platform = 'Direct';
+                title = 'Partner Store Online Purchase';
+                price = 400;
+            }
+
+            document.getElementById('planner-item-title').value = title;
+            document.getElementById('planner-item-cat').value = cat;
+            document.getElementById('planner-platform-select').value = platform;
+            updatePlannerPlatformBadge(platform);
+            state.planner.amount = price;
+            state.planner.months = 3;
+            refreshPlanner();
+            showToast(`Fetched item from ${platform}! Calculated 0% APR split below.`, 'success');
+        }
+
+        function updatePlannerPlatformBadge(platform) {
+            state.planner.platform = platform;
+            const badge = document.getElementById('planner-platform-badge');
+            if (!badge) return;
+            if (platform === 'Shopee') {
+                badge.textContent = 'Shopee Mall Partner';
+                badge.className = 'px-3 py-1 rounded-lg text-xs font-extrabold text-white shopee-gradient';
+            } else if (platform === 'Lazada') {
+                badge.textContent = 'LazMall Partner';
+                badge.className = 'px-3 py-1 rounded-lg text-xs font-extrabold text-white lazada-gradient';
+            } else {
+                badge.textContent = 'B.O.S.S Direct Checkout';
+                badge.className = 'px-3 py-1 rounded-lg text-xs font-extrabold text-white bg-blue-600';
+            }
+        }
+
+        function syncPlanner(src) {
+            let val = src === 'slider' ? parseFloat(document.getElementById('planner-amount-slider').value) : (parseFloat(document.getElementById('planner-amount-input').value) || 50);
+            val = Math.max(50, Math.min(5000, val));
+            state.planner.amount = val;
+            refreshPlanner();
+        }
+        function setPlannerMonths(m) { state.planner.months = m; refreshPlanner(); }
+        function refreshPlanner() {
+            const { amount, months } = state.planner;
+            document.getElementById('planner-amount-slider').value = amount;
+            document.getElementById('planner-amount-input').value = amount;
+            document.getElementById('planner-formatted-val').textContent = formatMoney(amount);
+            document.getElementById('planner-avail-credit').textContent = formatMoney(state.availableLimit);
+
+            [3, 4, 6, 12].forEach(m => {
+                const btn = document.getElementById(`pl-m-${m}`);
+                const active = m === months;
+                btn.className = `pl-m-btn p-3 rounded-xl border-2 text-center transition ${active ? 'border-blue-600 bg-blue-50/60 dark:bg-blue-950/40' : 'border-slate-200 dark:border-slate-700'}`;
+            });
+
+            const feeRate = months === 6 ? 0.025 : (months === 12 ? 0.045 : 0);
+            const fee = amount * feeRate;
+            const total = amount + fee;
+            const perSplit = total / months;
+
+            document.getElementById('pl-out-principal').textContent = formatMoney(amount);
+            document.getElementById('pl-out-fee').textContent = fee === 0 ? `${formatMoney(0)} (0% APR)` : `${formatMoney(fee)} (${(feeRate * 100).toFixed(1)}% Fee)`;
+            document.getElementById('pl-out-total').textContent = formatMoney(total);
+            document.getElementById('pl-out-monthly').textContent = formatMoney(perSplit);
+
+            let currentMonthlyLoad = 0;
+            state.installments.forEach(p => { if (p.months > p.paidCount) currentMonthlyLoad += p.monthlyAmount; });
+            const newLoad = currentMonthlyLoad + perSplit;
+            const noteEl = document.getElementById('pl-guardrail-note');
+            if (newLoad > state.survey.monthlySafeCap) {
+                noteEl.textContent = `⚠ Pushes monthly load (${formatMoney(newLoad, true)}) over your ${formatMoney(state.survey.monthlySafeCap, true)} cap`;
+                noteEl.className = 'text-amber-400 text-[11px]';
+            } else {
+                noteEl.textContent = `✓ Within your ${formatMoney(state.survey.monthlySafeCap, true)}/mo Safe Cap`;
+                noteEl.className = 'text-emerald-400 text-[11px]';
+            }
+
+            let datesHtml = '';
+            for (let i = 0; i < months; i++) {
+                const d = new Date(2026, 10 + i, 13);
+                const dStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                datesHtml += `<div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 flex justify-between items-center text-xs">
+                    <div><span class="font-extrabold">Split ${i + 1} of ${months}</span><p class="text-slate-500">${i === 0 ? 'Due Today (Checkout)' : dStr}</p></div>
+                    <span class="font-extrabold text-blue-600">${formatMoney(perSplit)}</span>
+                </div>`;
+            }
+            document.getElementById('planner-dates-list').innerHTML = datesHtml;
+        }
+        function executePlannedPurchase() {
+            const title = document.getElementById('planner-item-title').value.trim() || 'Smart BNPL Purchase';
+            const category = document.getElementById('planner-item-cat').value;
+            const platform = document.getElementById('planner-platform-select').value;
+            const { amount, months } = state.planner;
+            const feeRate = months === 6 ? 0.025 : (months === 12 ? 0.045 : 0);
+            const total = amount * (1 + feeRate);
+            const perSplit = total / months;
+            const creditNeeded = total - perSplit;
+
+            if (creditNeeded > state.availableLimit) {
+                showToast('Insufficient credit limit! Complete instant e-KYC to double your limit.', 'error');
+                return;
+            }
+            state.availableLimit -= creditNeeded;
+            const orderId = 'BOSS-' + Math.floor(1000 + Math.random() * 9000);
+            state.installments.unshift({
+                id: orderId, platform, title, category, merchant: `${platform} Official Store`,
+                totalAmount: total, months, paidCount: 1, monthlyAmount: perSplit,
+                status: 'Upcoming', nextDueDate: '2026-12-13', autoPay: true
+            });
+            state.paymentHistory.unshift({
+                receiptId: 'RCP-' + Math.floor(1000 + Math.random() * 9000),
+                date: '2026-11-13', desc: `[${platform}] Split 1/${months} — ${title}`, amount: perSplit, status: 'Paid'
+            });
+            state.calendarEntries.unshift({ id: 'ce-' + Date.now(), date: '2026-11-13', source: 'auto', kind: 'purchase', title: `[${platform}] ${title} (Split 1/${months} Paid)`, amount: perSplit });
+            for (let i = 1; i < months; i++) {
+                const d = new Date(2026, 10 + i, 13);
+                const dStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                state.calendarEntries.unshift({ id: 'ce-due-' + Date.now() + '-' + i, date: dStr, source: 'auto', kind: 'due', title: `[${platform}] Due: ${title} (Split ${i + 1}/${months})`, amount: perSplit });
+            }
+            saveState(); updateHeaderUserBadge();
+            showToast(`${platform} order confirmed & auto-logged to your Smart Calendar!`, 'success');
+            switchTab('calendar');
+        }
+
+        // SMART CALENDAR
+        function changeCalendarMonth(delta) {
+            let m = state.calendarView.month + delta, y = state.calendarView.year;
+            if (m < 0) { m = 11; y--; } if (m > 11) { m = 0; y++; }
+            state.calendarView.month = m; state.calendarView.year = y; renderCalendar();
+        }
+        function renderCalendar() {
+            const { year, month, selectedDate } = state.calendarView;
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            document.getElementById('cal-month-title').textContent = `${monthNames[month]} ${year}`;
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            let cellsHtml = '';
+            for (let b = 0; b < firstDay; b++) cellsHtml += `<div class="h-16 sm:h-24 rounded-xl bg-slate-50/50 dark:bg-slate-800/20"></div>`;
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dayEntries = state.calendarEntries.filter(e => e.date === dateStr);
+                const isSelected = dateStr === selectedDate;
+                const isToday = dateStr === '2026-11-13';
+                const dots = dayEntries.slice(0, 4).map(e => {
+                    let c = 'bg-emerald-500';
+                    if (e.source === 'auto') c = (e.kind === 'purchase' || e.kind === 'paid') ? 'bg-blue-500' : (e.kind === 'due' ? 'bg-amber-500' : 'bg-rose-500');
+                    return `<span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${c}"></span>`;
+                }).join('');
+                cellsHtml += `<div onclick="selectCalendarDate('${dateStr}')" class="h-16 sm:h-24 p-1.5 sm:p-2 rounded-xl border cursor-pointer transition flex flex-col justify-between ${isSelected ? 'border-blue-600 bg-blue-50/70 dark:bg-blue-950/50' : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900'}">
+                    <div class="flex justify-between items-center"><span class="text-[11px] sm:text-xs font-extrabold ${isToday ? 'px-1.5 py-0.5 rounded bg-blue-600 text-white' : ''}">${day}</span>${dayEntries.length ? `<span class="text-[9px] sm:text-[10px] font-bold text-slate-400">${dayEntries.length}</span>` : ''}</div>
+                    <div><div class="flex gap-0.5 sm:gap-1 mb-0.5">${dots}</div>${dayEntries[0] ? `<p class="hidden sm:block text-[10px] truncate text-slate-600 dark:text-slate-300">${dayEntries[0].title}</p>` : ''}</div>
+                </div>`;
+            }
+            document.getElementById('calendar-days-grid').innerHTML = cellsHtml;
+            renderSelectedDayPanel();
+        }
+        function selectCalendarDate(dateStr) { state.calendarView.selectedDate = dateStr; renderCalendar(); }
+        function renderSelectedDayPanel() {
+            const dateStr = state.calendarView.selectedDate;
+            document.getElementById('cal-selected-date-label').textContent = dateStr;
+            const entries = state.calendarEntries.filter(e => e.date === dateStr);
+            document.getElementById('cal-entry-count-badge').textContent = `${entries.length} log(s)`;
+            const listEl = document.getElementById('cal-day-entries-list');
+            if (!entries.length) {
+                listEl.innerHTML = `<div class="p-4 text-center text-xs text-slate-400 border border-dashed border-slate-200 dark:border-slate-700 rounded-xl">No logs or notes on this date. Add a personal note above!</div>`;
+                return;
+            }
+            listEl.innerHTML = entries.map(e => {
+                const isAuto = e.source === 'auto';
+                return `<div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/60 space-y-1">
+                    <div class="flex justify-between items-center">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase ${isAuto ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'}">${isAuto ? 'Auto • ' + e.kind : 'Note • ' + e.kind}</span>
+                        ${!isAuto ? `<button onclick="deleteCalendarNote('${e.id}')" class="text-rose-500 text-xs"><i class="fa-solid fa-trash"></i></button>` : ''}
+                    </div>
+                    <p class="text-xs font-bold">${e.title}</p>
+                    ${e.amount > 0 ? `<p class="text-xs font-extrabold text-blue-600">${formatMoney(e.amount)}</p>` : ''}
+                </div>`;
+            }).join('');
+        }
+        function addCalendarUserNote(e) {
+            e.preventDefault();
+            const type = document.getElementById('cal-note-type').value;
+            let amount = parseFloat(document.getElementById('cal-note-amount').value) || 0;
+            if (state.currency === 'VND' && amount > 10000) amount = amount / VND_RATE;
+            const text = document.getElementById('cal-note-text').value.trim();
+            if (!text) return;
+            state.calendarEntries.unshift({ id: 'note-' + Date.now(), date: state.calendarView.selectedDate, source: 'manual', kind: type, title: text, amount });
+            document.getElementById('cal-note-text').value = '';
+            document.getElementById('cal-note-amount').value = '';
+            saveState(); renderCalendar();
+            showToast('Personal money note saved to calendar!', 'success');
+        }
+        function deleteCalendarNote(id) {
+            state.calendarEntries = state.calendarEntries.filter(e => e.id !== id);
+            saveState(); renderCalendar(); showToast('Note deleted.', 'info');
+        }
+
+        // PAYMENT MANAGEMENT & VIRTUAL CARD
+        function filterPaymentPlans(f) { state.paymentFilter = f; refreshPaymentsTab(); }
+        function refreshPaymentsTab() {
+            const list = state.installments.filter(p => state.paymentFilter === 'ALL' || (p.status === 'Overdue' && p.paidCount < p.months));
+            document.getElementById('payment-plans-container').innerHTML = list.map(p => {
+                const isDone = p.paidCount >= p.months;
+                const badgeClass = isDone ? 'bg-emerald-100 text-emerald-800' : (p.status === 'Overdue' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800');
+                const statusLabel = isDone ? 'Paid' : p.status;
+                const platBadge = p.platform === 'Shopee' ? '<span class="px-2 py-0.5 rounded text-[10px] font-extrabold text-white shopee-gradient">Shopee</span>' : (p.platform === 'Lazada' ? '<span class="px-2 py-0.5 rounded text-[10px] font-extrabold text-white lazada-gradient">Lazada</span>' : '');
+                return `<div class="p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-3">
+                    <div class="flex flex-wrap justify-between items-start gap-2">
+                        <div>
+                            <div class="flex items-center gap-2"><span class="text-xs font-mono font-bold text-slate-400">${p.id}</span>${platBadge}<span class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold ${badgeClass}">${statusLabel}</span></div>
+                            <h4 class="font-extrabold text-sm sm:text-base mt-1">${p.title}</h4>
+                            <p class="text-xs text-slate-500">Paid ${p.paidCount}/${p.months} splits • Next due: <strong>${isDone ? 'Completed' : p.nextDueDate}</strong></p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-base sm:text-lg font-extrabold text-blue-600">${formatMoney(p.monthlyAmount)} <span class="text-xs font-normal text-slate-400">/ split</span></p>
+                            <label class="inline-flex items-center gap-1.5 text-xs font-bold mt-1 cursor-pointer">
+                                <input type="checkbox" ${p.autoPay ? 'checked' : ''} onchange="togglePlanAutoPay('${p.id}')" class="accent-blue-600"> Auto-Pay
+                            </label>
+                        </div>
+                    </div>
+                    ${!isDone ? `<div class="flex flex-wrap gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                        <button onclick="payNextSplit('${p.id}')" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl">Pay Next Split (${formatMoney(p.monthlyAmount)})</button>
+                        <button onclick="payOffEarly('${p.id}')" class="px-3.5 py-2 bg-slate-100 dark:bg-slate-800 font-bold text-xs rounded-xl">Pay Off Early (0% Fee)</button>
+                    </div>` : ''}
+                </div>`;
+            }).join('');
+
+            document.getElementById('payment-history-tbody').innerHTML = state.paymentHistory.map(h => `
+                <tr><td class="px-4 py-3 font-mono font-bold">${h.receiptId}</td><td class="px-4 py-3">${h.date}</td><td class="px-4 py-3 font-semibold">${h.desc}</td><td class="px-4 py-3 font-extrabold text-emerald-600">${formatMoney(h.amount)}</td><td class="px-4 py-3"><span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-bold">${h.status}</span></td></tr>
+            `).join('');
+
+            document.getElementById('refund-order-select').innerHTML = state.installments.map(p => `<option value="${p.id}">${p.id} — ${p.title}</option>`).join('');
+            document.getElementById('refund-requests-list').innerHTML = state.refundRequests.map(r => `<div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 flex justify-between"><span><strong>${r.orderId}</strong>: ${r.reason}</span><span class="text-indigo-600 font-bold">${r.status}</span></div>`).join('');
+        }
+        function togglePlanAutoPay(id) {
+            const p = state.installments.find(i => i.id === id);
+            if (p) { p.autoPay = !p.autoPay; saveState(); showToast(`Auto-Pay ${p.autoPay ? 'enabled' : 'disabled'} for ${id}.`, 'info'); }
+        }
+        function payNextSplit(id) {
+            const p = state.installments.find(i => i.id === id);
+            if (!p || p.paidCount >= p.months) return;
+            p.paidCount++;
+            p.status = p.paidCount >= p.months ? 'Paid' : 'Upcoming';
+            state.availableLimit = Math.min(state.totalLimit, state.availableLimit + p.monthlyAmount);
+            state.paymentHistory.unshift({ receiptId: 'RCP-' + Math.floor(1000 + Math.random() * 9000), date: '2026-11-13', desc: `[${p.platform}] Split ${p.paidCount}/${p.months} — ${p.title}`, amount: p.monthlyAmount, status: 'Paid' });
+            state.calendarEntries.unshift({ id: 'ce-paid-' + Date.now(), date: '2026-11-13', source: 'auto', kind: 'paid', title: `Paid Split ${p.paidCount}/${p.months}: ${p.title}`, amount: p.monthlyAmount });
+            saveState(); updateHeaderUserBadge(); refreshPaymentsTab();
+            showToast(`Split paid! Available credit restored by +${formatMoney(p.monthlyAmount)}.`, 'success');
+        }
+        function payOffEarly(id) {
+            const p = state.installments.find(i => i.id === id);
+            if (!p) return;
+            const remAmt = (p.months - p.paidCount) * p.monthlyAmount;
+            p.paidCount = p.months; p.status = 'Paid';
+            state.availableLimit = Math.min(state.totalLimit, state.availableLimit + remAmt);
+            state.paymentHistory.unshift({ receiptId: 'RCP-' + Math.floor(1000 + Math.random() * 9000), date: '2026-11-13', desc: `[${p.platform}] Early Payoff — ${p.title}`, amount: remAmt, status: 'Paid' });
+            state.calendarEntries.unshift({ id: 'ce-early-' + Date.now(), date: '2026-11-13', source: 'auto', kind: 'paid', title: `Early Full Payoff: ${p.title}`, amount: remAmt });
+            saveState(); updateHeaderUserBadge(); refreshPaymentsTab();
+            showToast(`Order paid off in full! Credit limit restored.`, 'success');
+        }
+        function toggleVcReveal() {
+            state.virtualCard.revealed = !state.virtualCard.revealed;
+            document.getElementById('vc-num').textContent = state.virtualCard.revealed ? '4532  7190  3341  8821' : '4532  ••••  ••••  8821';
+            document.getElementById('vc-cvv').textContent = state.virtualCard.revealed ? '849' : '•••';
+            document.getElementById('vc-reveal-btn').textContent = state.virtualCard.revealed ? 'Hide Details' : 'Reveal Card';
+        }
+        function toggleVcFreeze() {
+            state.virtualCard.frozen = !state.virtualCard.frozen;
+            const badge = document.getElementById('vc-badge');
+            badge.textContent = state.virtualCard.frozen ? 'Frozen' : 'Active';
+            badge.className = state.virtualCard.frozen ? 'px-2.5 py-0.5 bg-rose-100 text-rose-800 text-xs font-bold rounded-full' : 'px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full';
+            document.getElementById('vc-freeze-btn').textContent = state.virtualCard.frozen ? 'Unfreeze Card' : 'Freeze Card';
+        }
+        function submitRefundRequest(e) {
+            e.preventDefault();
+            const orderId = document.getElementById('refund-order-select').value;
+            const reason = document.getElementById('refund-reason').value.trim();
+            state.refundRequests.unshift({ id: 'RMA-' + Math.floor(100 + Math.random() * 900), orderId, reason, status: 'Approved • Installments Paused' });
+            document.getElementById('refund-reason').value = '';
+            saveState(); refreshPaymentsTab();
+            showToast('Return/Refund request logged and installments paused.', 'success');
+        }
+
+        // e-KYC
+        function openEkycModal() { document.getElementById('ekyc-modal').classList.remove('hidden'); }
+        function completeEkycUpgrade(e) {
+            e.preventDefault();
+            if (!state.isKycVerified) { state.isKycVerified = true; state.totalLimit = 5000; state.availableLimit += 2500; }
+            closeModal('ekyc-modal'); saveState(); updateHeaderUserBadge(); refreshDashboard();
+            showToast(`e-KYC Verified! Credit Limit upgraded to ${formatMoney(5000)}.`, 'success');
+        }
+
+        // USER ACCOUNT
+        function renderAvatarPresets() {
+            document.getElementById('avatar-presets-box').innerHTML = AVATAR_PRESETS.map((url, idx) => `
+                <img src="${url}" onclick="selectPresetAvatar('${url}')" alt="Preset ${idx + 1}" class="w-11 h-11 rounded-xl object-cover cursor-pointer border-2 border-transparent hover:border-blue-600 transition">
+            `).join('');
+        }
+        function selectPresetAvatar(url) {
+            state.user.avatar = url; saveState(); updateHeaderUserBadge(); refreshAccountTab();
+            showToast('Profile avatar updated!', 'success');
+        }
+        function refreshAccountTab() {
+            document.getElementById('account-preview-avatar').src = state.user.avatar;
+            document.getElementById('prof-name').value = state.user.name;
+            document.getElementById('prof-email').value = state.user.email;
+            document.getElementById('prof-phone').value = state.user.phone;
+            document.getElementById('prof-role').value = state.user.role;
+            document.getElementById('prof-city').value = state.user.city;
+        }
+        function saveUserProfile(e) {
+            e.preventDefault();
+            state.user.name = document.getElementById('prof-name').value.trim();
+            state.user.email = document.getElementById('prof-email').value.trim();
+            state.user.phone = document.getElementById('prof-phone').value.trim();
+            state.user.role = document.getElementById('prof-role').value.trim();
+            state.user.city = document.getElementById('prof-city').value.trim();
+            saveState(); updateHeaderUserBadge();
+            showToast('Personal profile saved!', 'success');
+        }
+
+        // SUPPORT & B2B
+        const FAQS = [
+            { q: 'How does B.O.S.S integrate with Shopee and Lazada?', a: 'Shoppers can select Shopee Mall or LazMall partner items directly inside B.O.S.S, paste any Shopee/Lazada product link into our Smart Link Importer, or pay at checkout using the B.O.S.S Virtual Card.' },
+            { q: 'How does B.O.S.S 0% APR installment work?', a: 'Choose 3-month or 4-month split plans at checkout with 0% interest and zero hidden service fees. Your first split is paid at checkout, and remaining splits follow a fixed monthly schedule.' },
+            { q: 'How does B.O.S.S prevent overspending and debt traps?', a: 'Our Monthly Safe Budget Guardrail alerts you if new installments exceed your self-set monthly cap, while the Smart Calendar auto-logs every due date.' }
+        ];
+        function renderFaqAccordion() {
+            document.getElementById('faq-accordion').innerHTML = FAQS.map(f => `
+                <details class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs">
+                    <summary class="font-extrabold cursor-pointer">${f.q}</summary>
+                    <p class="text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">${f.a}</p>
+                </details>`).join('');
+        }
+        function refreshSupportTab() {
+            document.getElementById('support-tickets-list').innerHTML = state.supportTickets.map(t => `
+                <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs flex justify-between items-center">
+                    <div><span class="font-mono font-bold text-blue-600">${t.id}</span> • <strong>${t.type}</strong><p class="text-slate-500 mt-0.5">${t.subject}</p></div>
+                    <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">${t.status}</span>
+                </div>`).join('');
+        }
+        function submitSupportTicket(e) {
+            e.preventDefault();
+            const type = document.getElementById('sup-type').value;
+            const desc = document.getElementById('sup-desc').value.trim();
+            state.supportTickets.unshift({ id: 'TKT-' + Math.floor(100 + Math.random() * 900), type, subject: desc, status: 'Open • Assigned to Da Nang Desk' });
+            document.getElementById('sup-desc').value = '';
+            saveState(); refreshSupportTab();
+            showToast('Support ticket submitted to B.O.S.S Support Desk.', 'success');
+        }
+        function openLegalModal(type) {
+            document.getElementById('legal-modal-title').textContent = type === 'privacy' ? 'Privacy Policy — B.O.S.S FinTech Solutions JSC' : 'Terms of Service — Buy On Smart Schedule';
+            document.getElementById('legal-modal-body').innerHTML = type === 'privacy'
+                ? '<p>B.O.S.S FinTech Solutions JSC (headquartered at University of Economics - The University of Da Nang) encrypts all personal, e-KYC, and transaction records. We never sell user financial habits to third-party advertisers.</p>'
+                : '<p>By using B.O.S.S (Buy On Smart Schedule), users agree to repay scheduled splits on agreed due dates. 3-month and 4-month plans carry 0% APR. Early payoffs are permitted at any time with zero penalty.</p>';
+            document.getElementById('legal-modal').classList.remove('hidden');
+        }
+        function calcB2b() {
+            const vis = parseInt(document.getElementById('b2b-vis').value);
+            const aov = parseInt(document.getElementById('b2b-aov').value);
+            document.getElementById('b2b-vis-lbl').textContent = vis.toLocaleString();
+            document.getElementById('b2b-aov-lbl').textContent = formatMoney(aov, true);
+            const projAov = Math.round(aov * 1.28);
+            const extraRev = Math.round((vis * 0.025 * 1.18 * projAov) - (vis * 0.025 * aov));
+            document.getElementById('b2b-res-aov').textContent = formatMoney(projAov, true);
+            document.getElementById('b2b-res-rev').textContent = `+${formatMoney(extraRev, true)}`;
+        }
+        function submitB2bPartner(e) { e.preventDefault(); e.target.reset(); showToast('Merchant Partnership application sent! Sandbox API key emailed.', 'success'); }
+    </script>
+</body>
+</html>
