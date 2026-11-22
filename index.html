@@ -1227,79 +1227,62 @@
         }
 
         function decodeEcommerceUrl(rawInput) {
-            const cleaned = rawInput.trim();
-            const lower = cleaned.toLowerCase();
+  const cleaned = rawInput.trim();
+  const lower = cleaned.toLowerCase();
 
-            // 1. Detect platform
-            let platform = 'Direct';
-            if (lower.includes('shopee') || lower.includes('shp.ee')) {
-                platform = 'Shopee';
-            } else if (lower.includes('lazada')) {
-                platform = 'Lazada';
-            }
+  let platform = 'Shopee';
+  if (lower.includes('lazada')) {
+    platform = 'Lazada';
+  } else if (lower.includes('shopee') || lower.includes('shp.ee')) {
+    platform = 'Shopee';
+  }
 
-            // 2. Strip query parameters and protocol/domain
-            let pathPart = cleaned.split('?')[0].split('#')[0];
-            pathPart = pathPart.replace(/^https?:\/\/[^\/]+\//i, '');
-            pathPart = pathPart.replace(/^products\//i, '');
+  // Cắt bỏ tên miền, đuôi ?extraParam và mã ID -i.xxx của Shopee/Lazada
+  let slug = cleaned
+    .replace(/^https?:\/\/[^\/]+\//i, '')
+    .split('?')[0]
+    .replace(/-i\.\d+\.\d+.*$/i, '')
+    .replace(/\.html.*$/i, '');
 
-            // 3. Strip Shopee item/shop IDs (-i.12345.67890) and Lazada IDs (-i12345-s67890.html or .html)
-            pathPart = pathPart.replace(/-i\.\d+\.\d+.*$/i, '');
-            pathPart = pathPart.replace(/-i\d+(-s\d+)?\.html$/i, '');
-            pathPart = pathPart.replace(/\.html$/i, '');
+  let title = '';
+  try {
+    title = decodeURIComponent(slug).replace(/-/g, ' ').trim();
+  } catch (e) {
+    // Dự phòng khi link bị lỗi mã hóa tiếng Việt (%C4%90i...): lọc giữ lại tên tiếng Anh & số rõ nghĩa
+    title = slug
+      .replace(/%[0-9A-Fa-f]{0,2}/g, ' ')
+      .replace(/[^a-zA-Z0-9\s]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .replace(/^[a-zA-Z]{1,4}\s+(?=[A-Z])/, '')
+      .trim();
+  }
 
-            // 4. Safely decode Vietnamese & international percent-encoding
-            let decoded = pathPart;
-            try {
-                decoded = decodeURIComponent(pathPart);
-            } catch (err) {
-                try {
-                    decoded = decodeURIComponent(pathPart.replace(/%(?![0-9][0-9a-fA-F]+)/g, '%25'));
-                } catch (e2) {
-                    decoded = pathPart;
-                }
-            }
+  if (!title || title.length < 4) {
+    title = platform === 'Lazada' ? 'LazMall Flagship Product' : 'Shopee Mall Lifestyle & Gadget Deal';
+  }
 
-            // 5. Clean hyphens/underscores into readable title
-            let title = decoded.replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim();
-            if (!title || title.length < 3 || /^[a-z0-9]{5,12}$/i.test(title)) {
-                if (platform === 'Shopee') title = 'Shopee Mall Featured Product Deal';
-                else if (platform === 'Lazada') title = 'LazMall Official Store Item';
-                else title = 'Partner E-Commerce Product';
-            } else {
-                title = title.charAt(0).toUpperCase() + title.slice(1);
-            }
+  // Tự động nhận diện giá & danh mục thông minh theo từ khóa
+  let price = 360;
+  let category = 'Technology';
+  const tLower = title.toLowerCase();
 
-            // 6. Infer realistic USD price & category from Vietnamese/English keywords
-            const tLower = title.toLowerCase();
-            let price = 240; // Default $240 (6,000,000 VND)
-            let category = 'Technology';
+  if (tLower.includes('iphone 17') || tLower.includes('iphone 18') || tLower.includes('pro max')) {
+    price = 1199;
+  } else if (tLower.includes('iphone')) {
+    price = 899;
+  } else if (tLower.includes('macbook') || tLower.includes('laptop')) {
+    price = 1299;
+  } else if (tLower.includes('sony') || tLower.includes('camera') || tLower.includes('alpha')) {
+    price = 600;
+  } else if (tLower.includes('dyson') || tLower.includes('vacuum')) {
+    price = 650;
+  } else if (tLower.includes('shoe') || tLower.includes('bag') || tLower.includes('dress') || tLower.includes('nike')) {
+    price = 140;
+    category = 'Fashion';
+  }
 
-            if (tLower.includes('iphone') || tLower.includes('pro max') || tLower.includes('galaxy s') || tLower.includes('ultra')) {
-                price = 1360; // 34,000,000 VND
-                category = 'Technology';
-            } else if (tLower.includes('macbook') || tLower.includes('laptop') || tLower.includes('ipad') || tLower.includes('máy tính')) {
-                price = 1200; // 30,000,000 VND
-                category = 'Technology';
-            } else if (tLower.includes('sony') || tLower.includes('camera') || tLower.includes('máy ảnh') || tLower.includes('alpha')) {
-                price = 600; // 15,000,000 VND
-                category = 'Technology';
-            } else if (tLower.includes('điện thoại') || tLower.includes('phone') || tLower.includes('tai nghe') || tLower.includes('headphone') || tLower.includes('watch')) {
-                price = 360; // 9,000,000 VND
-                category = 'Technology';
-            } else if (tLower.includes('dyson') || tLower.includes('máy giặt') || tLower.includes('tủ lạnh') || tLower.includes('máy hút bụi') || tLower.includes('nồi chiên') || tLower.includes('washer')) {
-                price = 480; // 12,000,000 VND
-                category = 'Home Appliances';
-            } else if (tLower.includes('áo') || tLower.includes('quần') || tLower.includes('giày') || tLower.includes('túi') || tLower.includes('blazer') || tLower.includes('váy') || tLower.includes('shoes') || tLower.includes('bag')) {
-                price = 140; // 3,500,000 VND
-                category = 'Fashion';
-            } else if (tLower.includes('xe') || tLower.includes('vinfast') || tLower.includes('scooter') || tLower.includes('bike')) {
-                price = 960; // 24,000,000 VND
-                category = 'Transportation';
-            }
-
-            return { platform, title, price, category };
-        }
+  return { platform, title, price, category };
+}
 
         function importEcommerceLink(e) {
             if (e && e.preventDefault) e.preventDefault();
